@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-line: #e2e8f0;
+  --color-danger: #b91c1c;
+  --color-success: #166534;
+  --color-warning: #92400e;
+  --color-todo-bg: #f1f5f9;
+  --color-todo-fg: #475569;
+  --color-doing-bg: #dbeafe;
+  --color-doing-fg: #1d4ed8;
+  --color-done-bg: #dcfce7;
+  --color-done-fg: #166534;
+  --color-low-bg: #f1f5f9;
+  --color-low-fg: #475569;
+  --color-medium-bg: #fef3c7;
+  --color-medium-fg: #92400e;
+  --color-high-bg: #fee2e2;
+  --color-high-fg: #b91c1c;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --shadow-overlay: 0 8px 24px rgb(15 23 42 / 0.08);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  overflow-x: clip;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
