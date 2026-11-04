@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      SESSION_SECRET: ${SESSION_SECRET:?đặt SESSION_SECRET}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3000}
+      DATABASE_PATH: /app/server/data/app.db
+    volumes:
+      - app-data:/app/server/data
+
+volumes:
+  app-data:

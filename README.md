@@ -22,6 +22,18 @@ npm run dev
 
 Mở http://localhost:5173. API lắng nghe cổng 3000. Vite proxy `/api` để cookie đi cùng origin.
 
+## Một server
+
+Trang và API cùng một process, cổng 3000. `CLIENT_ORIGIN` phải đúng URL trên thanh địa chỉ.
+
+```bash
+export SESSION_SECRET=mot-chuoi-dai-bat-ky
+export CLIENT_ORIGIN=http://localhost:3000
+docker compose up -d --build
+```
+
+Mở máy từ xa thì đổi origin thành địa chỉ đó, ví dụ `http://203.0.113.10:3000`, rồi `docker compose up -d`. Database nằm trong volume `app-data`.
+
 Test API, trong `server/`:
 
 ```bash

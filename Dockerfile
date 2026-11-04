@@ -19,8 +19,7 @@ COPY server/src ./src
 FROM node:26.13.0-bookworm-slim
 
 ENV PORT=3000 \
-    DATABASE_PATH=/app/server/data/app.db \
-    CLIENT_ORIGIN=http://localhost:3000
+    DATABASE_PATH=/app/server/data/app.db
 
 WORKDIR /app
 COPY --from=server --chown=node:node /src/server /app/server
