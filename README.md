@@ -34,6 +34,8 @@ docker compose up -d --build
 
 Mở máy từ xa thì đổi origin thành địa chỉ đó, ví dụ `http://203.0.113.10:3000`, rồi `docker compose up -d`. Database nằm trong volume `app-data`.
 
+Trên Vercel, Root Directory để `.`, preset **Services**. `vercel.json` gộp client và server thành một container. Không bấm Import single project. Trong project, đặt `SESSION_SECRET` và `CLIENT_ORIGIN` đúng URL Vercel cấp, ví dụ `https://sch-app.vercel.app`.
+
 Test API, trong `server/`:
 
 ```bash
