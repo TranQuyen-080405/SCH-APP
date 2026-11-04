@@ -1,4 +1,4 @@
-# Việc của tôi
+# SCHE-APP
 
 Ứng dụng quản lý công việc cá nhân: đăng ký, đăng nhập, danh sách việc, và một màn tổng quan để xem việc đã xong.
 
