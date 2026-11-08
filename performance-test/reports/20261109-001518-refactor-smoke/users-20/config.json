@@ -1,0 +1,37 @@
+{
+  "users": 20,
+  "spawn_rate": 10.0,
+  "warmup_seconds": 3,
+  "measurement_seconds": 20,
+  "host": "http://127.0.0.1:52387",
+  "command": [
+    "L:\\schedule_app\\performance-test\\.venv\\Scripts\\python.exe",
+    "-m",
+    "locust",
+    "-f",
+    "L:\\schedule_app\\performance-test\\locustfile.py",
+    "--headless",
+    "-H",
+    "http://127.0.0.1:52387",
+    "-u",
+    "20",
+    "-r",
+    "10.0",
+    "-t",
+    "265",
+    "--stop-timeout",
+    "5",
+    "--only-summary",
+    "--html",
+    "L:\\schedule_app\\performance-test\\reports\\20261109-001518-refactor-smoke\\users-20\\report.html",
+    "--csv",
+    "L:\\schedule_app\\performance-test\\reports\\20261109-001518-refactor-smoke\\users-20\\locust",
+    "--csv-full-history"
+  ],
+  "fixtures": {
+    "accounts": 20,
+    "tasks_per_account": 20,
+    "projects_per_account": 3,
+    "notes_per_account": 5
+  }
+}

@@ -29,7 +29,7 @@ function task(userId, overrides = {}) {
     title: "Việc",
     description: "",
     deadline: null,
-    priority: "medium",
+    priority: null,
     status: "todo",
     ...overrides,
   });
@@ -77,13 +77,13 @@ describe("task repository", { concurrency: false }, () => {
     assert.deepEqual(rows.map((row) => row.title), ["sớm", "muộn", "không hạn"]);
   });
 
-  test("priority low < medium < high", () => {
+  test("priority nullable, chỉ nhận low/high; loại sort không dùng", () => {
     const a = user("a@b.com");
-    task(a.id, { title: "high", priority: "high" });
-    task(a.id, { title: "low", priority: "low" });
-    task(a.id, { title: "medium", priority: "medium" });
-    const rows = taskRepository.list({ userId: a.id, status: null, sort: "priority", order: "asc" });
-    assert.deepEqual(rows.map((row) => row.title), ["low", "medium", "high"]);
+    assert.equal(task(a.id).priority, null);
+    assert.equal(task(a.id, { priority: "high" }).priority, "high");
+    assert.equal(task(a.id, { priority: "low" }).priority, "low");
+    assert.throws(() => task(a.id, { priority: "medium" }), /CHECK/);
+    assert.throws(() => taskRepository.list({ userId: a.id, sort: "priority", order: "asc" }), /Cột sắp xếp/);
   });
 
   test("update và delete của user khác không đổi dòng", () => {

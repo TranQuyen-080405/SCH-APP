@@ -1,0 +1,48 @@
+\section{Kết quả kiểm thử (Test Results)}
+
+\subsection{Kiểm thử chức năng}
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Nhóm} & \textbf{Tổng} & \textbf{Đạt} & \textbf{Lỗi} \\
+\midrule
+Backend: API, service, repository, database & 63 & 63 & 0 \\
+Frontend: lịch, ghi chú, form và badge ưu tiên & 12 & 12 & 0 \\
+\midrule
+Tổng & 75 & 75 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+TC01--TC10 đều đạt. Build production client thành công.
+Test frontend kiểm tra logic; chưa xác nhận thao tác giao diện bằng trình duyệt.
+
+
+Kiểm thử thêm migration đổi ưu tiên cũ thành NULL, chạy lại không đổi dữ liệu,
+giữ khóa ngoại, rollback lỗi và API từ chối mức ưu tiên đã bỏ.
+Bằng chứng mới: \texttt{evidence/20261109-refactor/}.
+
+\subsection{Kiểm tra refactor 09/11/2026}
+Locust chạy thử 20 users, warm-up 3 giây, đo 20 giây: 200 request, 0 lỗi,
+RPS 10,01 và P95 7 ms. Đây là kiểm tra kịch bản trên bản mới, chưa thay thế benchmark bốn mức tải.
+Bộ test frontend dựng HTML thật qua React/Vite để kiểm tra form và badge;
+chưa xác nhận tương tác đầy đủ bằng trình duyệt.
+
+\input{chapters/performance-results.tex}
+
+\subsection{Kiểm tra popup chọn}
+Đã kiểm tra Chrome tại 1366$\times$900 và màn hình cảm ứng mô phỏng
+390$\times$844: lọc công việc/dự án, sắp xếp, chọn trạng thái,
+chọn giá trị và lưu form, tự đánh giá, bàn phím, Escape/Tab và bấm ngoài.
+Popup nằm trong màn hình; không có lỗi JavaScript.
+Bằng chứng: \texttt{evidence/20261109-selects/}.
+
+Kiểm tra bổ sung danh sách dự án dài hơn 20 mục: thanh cuộn mảnh màu coral,
+cuộn chuột và chọn mục cuối bằng bàn phím đều đạt; style được xác nhận trên cổng 5173 và 3000.
+
+\subsection{Khung kéo thả ghi chú}
+Kiểm tra Chrome 1366$\times$900 và cảm ứng mô phỏng 390$\times$844:
+5 nhóm thao tác đều đạt trên mỗi kích thước: lấy giấy ra vẫn giữ khung;
+khớp ô và giữ vị trí sau tải lại; từ chối ô có giấy;
+cất giấy bằng bàn phím; hoàn tác khi API lưu lỗi. Không có lỗi JavaScript.
+Frontend sau cập nhật: 14/14 test đạt; build production thành công.
+Bằng chứng: \texttt{evidence/20261109-note-slots/}.

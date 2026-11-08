@@ -1,4 +1,5 @@
 const FIELD_ERRORS = {
+  "Dự án không hợp lệ": "projectId",
   "Email không được để trống": "email",
   "Email không đúng định dạng": "email",
   "Mật khẩu không được để trống": "password",
@@ -12,6 +13,7 @@ const FIELD_ERRORS = {
   "Nội dung ghi chú không hợp lệ": "content",
   "Nội dung không được dài quá 10000 ký tự": "content",
   "Ngày ghi chú không hợp lệ": "notedOn",
+  "Màu ghi chú không hợp lệ": "color",
   "Mô tả không hợp lệ": "description",
   "Mô tả không được dài quá 2000 ký tự": "description",
   "Deadline không phải ngày hợp lệ": "deadline",
@@ -32,7 +34,8 @@ export class ApiError extends Error {
 }
 
 export async function request(path, { method = "GET", body } = {}) {
-  const init = { method };
+  const apiUrl = (import.meta.env?.VITE_API_URL || "").replace(/\/$/, "");
+  const init = { method, credentials: "include" };
   if (body !== undefined) {
     init.headers = { "Content-Type": "application/json" };
     init.body = JSON.stringify(body);
@@ -40,7 +43,7 @@ export async function request(path, { method = "GET", body } = {}) {
 
   let response;
   try {
-    response = await fetch(path, init);
+    response = await fetch(`${apiUrl}${path}`, init);
   } catch {
     throw new ApiError(0, "Không kết nối được máy chủ.", true);
   }

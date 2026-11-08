@@ -1,0 +1,405 @@
+TAP version 13
+# Subtest: api
+    # Subtest: TC01 đăng ký hợp lệ không có cookie
+    ok 1 - TC01 đăng ký hợp lệ không có cookie
+      ---
+      duration_ms: 274.6406
+      type: 'test'
+      ...
+    # Subtest: TC02 email trùng
+    ok 2 - TC02 email trùng
+      ---
+      duration_ms: 96.5269
+      type: 'test'
+      ...
+    # Subtest: TC03 sai mật khẩu không có cookie
+    ok 3 - TC03 sai mật khẩu không có cookie
+      ---
+      duration_ms: 179.7932
+      type: 'test'
+      ...
+    # Subtest: TC04 thiếu tiêu đề
+    ok 4 - TC04 thiếu tiêu đề
+      ---
+      duration_ms: 138.3287
+      type: 'test'
+      ...
+    # Subtest: TC05 todo doing done
+    ok 5 - TC05 todo doing done
+      ---
+      duration_ms: 181.3989
+      type: 'test'
+      ...
+    # Subtest: TC06 lọc doing của đúng user
+    ok 6 - TC06 lọc doing của đúng user
+      ---
+      duration_ms: 251.6555
+      type: 'test'
+      ...
+    # Subtest: TC07 deadline tăng dần, không hạn ở cuối
+    ok 7 - TC07 deadline tăng dần, không hạn ở cuối
+      ---
+      duration_ms: 156.9709
+      type: 'test'
+      ...
+    # Subtest: TC08 user A không sửa hoặc xóa task của B
+    ok 8 - TC08 user A không sửa hoặc xóa task của B
+      ---
+      duration_ms: 183.6366
+      type: 'test'
+      ...
+    # Subtest: TC09 khách gọi API task
+    ok 9 - TC09 khách gọi API task
+      ---
+      duration_ms: 21.345
+      type: 'test'
+      ...
+    # Subtest: TC10 xóa task của mình
+    ok 10 - TC10 xóa task của mình
+      ---
+      duration_ms: 121.2333
+      type: 'test'
+      ...
+    # Subtest: AC-OWN list của A không có task của B
+    ok 11 - AC-OWN list của A không có task của B
+      ---
+      duration_ms: 198.2746
+      type: 'test'
+      ...
+    # Subtest: AC-PART PATCH status giữ title
+    ok 12 - AC-PART PATCH status giữ title
+      ---
+      duration_ms: 138.1958
+      type: 'test'
+      ...
+    # Subtest: AC-DEF POST chỉ title
+    ok 13 - AC-DEF POST chỉ title
+      ---
+      duration_ms: 122.5861
+      type: 'test'
+      ...
+    # Subtest: AC-IGN body userId bị bỏ qua
+    ok 14 - AC-IGN body userId bị bỏ qua
+      ---
+      duration_ms: 171.0736
+      type: 'test'
+      ...
+    # Subtest: AC-QUERY sort=id
+    ok 15 - AC-QUERY sort=id
+      ---
+      duration_ms: 102.2568
+      type: 'test'
+      ...
+    # Subtest: body không phải JSON
+    ok 16 - body không phải JSON
+      ---
+      duration_ms: 9.1491
+      type: 'test'
+      ...
+    # Subtest: login đúng có cookie sid HttpOnly, logout rồi me 401
+    ok 17 - login đúng có cookie sid HttpOnly, logout rồi me 401
+      ---
+      duration_ms: 153.2866
+      type: 'test'
+      ...
+    # Subtest: Origin lạ thì 403
+    ok 18 - Origin lạ thì 403
+      ---
+      duration_ms: 6.6812
+      type: 'test'
+      ...
+    # Subtest: dashboard khách 401, period sai 400, rỗng không bịa tỷ lệ
+    ok 19 - dashboard khách 401, period sai 400, rỗng không bịa tỷ lệ
+      ---
+      duration_ms: 138.1435
+      type: 'test'
+      ...
+    # Subtest: ghi chú chỉ thuộc chủ, từ chối nội dung trống
+    ok 20 - ghi chú chỉ thuộc chủ, từ chối nội dung trống
+      ---
+      duration_ms: 221.0828
+      type: 'test'
+      ...
+    # Subtest: ghi nhận kết quả tùy chọn, mở lại giữ ghi chú, dashboard cách ly
+    ok 21 - ghi nhận kết quả tùy chọn, mở lại giữ ghi chú, dashboard cách ly
+      ---
+      duration_ms: 273.3129
+      type: 'test'
+      ...
+    # Subtest: sort completed_at đưa task không có mốc xuống cuối
+    ok 22 - sort completed_at đưa task không có mốc xuống cuối
+      ---
+      duration_ms: 195.5059
+      type: 'test'
+      ...
+    1..22
+ok 1 - api
+  ---
+  duration_ms: 3341.7538
+  type: 'suite'
+  ...
+# Subtest: auth service
+    # Subtest: email trống
+    ok 1 - email trống
+      ---
+      duration_ms: 17.944
+      type: 'test'
+      ...
+    # Subtest: email sai định dạng
+    ok 2 - email sai định dạng
+      ---
+      duration_ms: 1.7486
+      type: 'test'
+      ...
+    # Subtest: mật khẩu sai độ dài
+    ok 3 - mật khẩu sai độ dài
+      ---
+      duration_ms: 3.5382
+      type: 'test'
+      ...
+    # Subtest: xác nhận mật khẩu không khớp
+    ok 4 - xác nhận mật khẩu không khớp
+      ---
+      duration_ms: 1.8215
+      type: 'test'
+      ...
+    # Subtest: email trùng 409
+    ok 5 - email trùng 409
+      ---
+      duration_ms: 134.6855
+      type: 'test'
+      ...
+    # Subtest: login không có email và sai mật khẩu cùng một câu 401
+    ok 6 - login không có email và sai mật khẩu cùng một câu 401
+      ---
+      duration_ms: 195.166
+      type: 'test'
+      ...
+    # Subtest: đăng ký không trả hash, findById không có hash
+    ok 7 - đăng ký không trả hash, findById không có hash
+      ---
+      duration_ms: 80.204
+      type: 'test'
+      ...
+    1..7
+ok 2 - auth service
+  ---
+  duration_ms: 439.5212
+  type: 'suite'
+  ...
+# Subtest: CORS permits credentialed JSON requests only from CLIENT_ORIGIN
+ok 3 - CORS permits credentialed JSON requests only from CLIENT_ORIGIN
+  ---
+  duration_ms: 174.6787
+  type: 'test'
+  ...
+# Subtest: schema
+    # Subtest: có index user và user_status
+    ok 1 - có index user và user_status
+      ---
+      duration_ms: 45.376
+      type: 'test'
+      ...
+    # Subtest: migration giữ task cũ và thêm cột
+    ok 2 - migration giữ task cũ và thêm cột
+      ---
+      duration_ms: 139.6744
+      type: 'test'
+      ...
+    # Subtest: migration keeps legacy note text and colors; later opens preserve chosen color and position
+    ok 3 - migration keeps legacy note text and colors; later opens preserve chosen color and position
+      ---
+      duration_ms: 108.0961
+      type: 'test'
+      ...
+    1..3
+ok 4 - schema
+  ---
+  duration_ms: 298.4926
+  type: 'suite'
+  ...
+# Subtest: note color and position persist; partial moves preserve text, date and color
+ok 5 - note color and position persist; partial moves preserve text, date and color
+  ---
+  duration_ms: 371.499
+  type: 'test'
+  ...
+# Subtest: note defaults and color/position validation reject malformed values without changing data
+ok 6 - note defaults and color/position validation reject malformed values without changing data
+  ---
+  duration_ms: 488.4695
+  type: 'test'
+  ...
+# Subtest: moving and recoloring notes require the owner, authentication and a valid origin
+ok 7 - moving and recoloring notes require the owner, authentication and a valid origin
+  ---
+  duration_ms: 232.0584
+  type: 'test'
+  ...
+# Subtest: hash rồi verify đúng, sai một ký tự, và hash không chứa mật khẩu
+ok 8 - hash rồi verify đúng, sai một ký tự, và hash không chứa mật khẩu
+  ---
+  duration_ms: 209.5858
+  type: 'test'
+  ...
+# Subtest: projects require authentication and protect write origins
+ok 9 - projects require authentication and protect write origins
+  ---
+  duration_ms: 468.8254
+  type: 'test'
+  ...
+# Subtest: project CRUD is scoped to owner and counts only unfinished tasks
+ok 10 - project CRUD is scoped to owner and counts only unfinished tasks
+  ---
+  duration_ms: 336.0432
+  type: 'test'
+  ...
+# Subtest: project fields and IDs reject malformed input
+ok 11 - project fields and IDs reject malformed input
+  ---
+  duration_ms: 275.8313
+  type: 'test'
+  ...
+# Subtest: task assignment rejects other users' projects and preserves existing assignment on status updates
+ok 12 - task assignment rejects other users' projects and preserves existing assignment on status updates
+  ---
+  duration_ms: 249.0431
+  type: 'test'
+  ...
+# Subtest: project, priority and status filters combine without leaking other users' tasks
+ok 13 - project, priority and status filters combine without leaking other users' tasks
+  ---
+  duration_ms: 253.5727
+  type: 'test'
+  ...
+# Subtest: deleting a project preserves tasks and unassigns them
+ok 14 - deleting a project preserves tasks and unassigns them
+  ---
+  duration_ms: 239.4206
+  type: 'test'
+  ...
+# Subtest: seed tài khoản thử một lần, chạy lại không trùng
+ok 15 - seed tài khoản thử một lần, chạy lại không trùng
+  ---
+  duration_ms: 169.8898
+  type: 'test'
+  ...
+# Subtest: task repository
+    # Subtest: list chỉ có task của user
+    ok 1 - list chỉ có task của user
+      ---
+      duration_ms: 61.9145
+      type: 'test'
+      ...
+    # Subtest: lọc status
+    ok 2 - lọc status
+      ---
+      duration_ms: 48.7971
+      type: 'test'
+      ...
+    # Subtest: deadline tăng dần, null ở cuối
+    ok 3 - deadline tăng dần, null ở cuối
+      ---
+      duration_ms: 49.2743
+      type: 'test'
+      ...
+    # Subtest: priority low < medium < high
+    ok 4 - priority low < medium < high
+      ---
+      duration_ms: 53.7376
+      type: 'test'
+      ...
+    # Subtest: update và delete của user khác không đổi dòng
+    ok 5 - update và delete của user khác không đổi dòng
+      ---
+      duration_ms: 48.4376
+      type: 'test'
+      ...
+    # Subtest: list là một câu SQL
+    ok 6 - list là một câu SQL
+      ---
+      duration_ms: 40.9942
+      type: 'test'
+      ...
+    # Subtest: list lọc 200 task dưới 200ms
+    ok 7 - list lọc 200 task dưới 200ms
+      ---
+      duration_ms: 866.5479
+      type: 'test'
+      ...
+    1..7
+ok 16 - task repository
+  ---
+  duration_ms: 1173.8631
+  type: 'suite'
+  ...
+# Subtest: task service validation
+    # Subtest: tiêu đề trống
+    ok 1 - tiêu đề trống
+      ---
+      duration_ms: 2.5788
+      type: 'test'
+      ...
+    # Subtest: tiêu đề dài hơn 200
+    ok 2 - tiêu đề dài hơn 200
+      ---
+      duration_ms: 0.3969
+      type: 'test'
+      ...
+    # Subtest: deadline 2026-02-31
+    ok 3 - deadline 2026-02-31
+      ---
+      duration_ms: 2.143
+      type: 'test'
+      ...
+    # Subtest: status sai
+    ok 4 - status sai
+      ---
+      duration_ms: 0.4124
+      type: 'test'
+      ...
+    # Subtest: priority sai
+    ok 5 - priority sai
+      ---
+      duration_ms: 0.3666
+      type: 'test'
+      ...
+    # Subtest: ghi chú và đánh giá sai
+    ok 6 - ghi chú và đánh giá sai
+      ---
+      duration_ms: 0.6402
+      type: 'test'
+      ...
+    # Subtest: period sai
+    ok 7 - period sai
+      ---
+      duration_ms: 0.7087
+      type: 'test'
+      ...
+    # Subtest: hoàn thành không bắt buộc ghi chú, mở lại giữ ghi chú
+    ok 8 - hoàn thành không bắt buộc ghi chú, mở lại giữ ghi chú
+      ---
+      duration_ms: 85.4852
+      type: 'test'
+      ...
+    # Subtest: dashboard đếm theo +07 và không bịa khi rỗng
+    ok 9 - dashboard đếm theo +07 và không bịa khi rỗng
+      ---
+      duration_ms: 72.3469
+      type: 'test'
+      ...
+    1..9
+ok 17 - task service validation
+  ---
+  duration_ms: 169.8531
+  type: 'suite'
+  ...
+1..17
+# tests 60
+# suites 5
+# pass 60
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4245.2423

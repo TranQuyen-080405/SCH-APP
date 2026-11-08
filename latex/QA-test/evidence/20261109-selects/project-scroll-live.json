@@ -1,0 +1,14 @@
+[
+  {
+    "port": 5173,
+    "width": "thin",
+    "color": "rgb(207, 62, 77) rgb(247, 247, 250)",
+    "verified": true
+  },
+  {
+    "port": 3000,
+    "width": "thin",
+    "color": "rgb(207, 62, 77) rgb(247, 247, 250)",
+    "verified": true
+  }
+]

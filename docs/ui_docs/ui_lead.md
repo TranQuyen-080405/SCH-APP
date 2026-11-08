@@ -1,3 +1,5 @@
+> Bản thiết kế/lộ trình lịch sử. Hợp đồng hiện tại: `docs/api-contract.md`, `docs/erd.md` và source sau refactor 09/11/2026; không triển khai lại tính năng đã bỏ theo ví dụ cũ.
+
 # UI/UX DESIGN PROMPT — PERSONAL TASK MANAGEMENT
 
 File này là brief thiết kế gốc. Phần để dựng giao diện đã tách ra các file dưới. Khi brief và file dựng lệch nhau, làm theo file dựng. Dữ liệu và HTTP vẫn theo `docs/api-contract.md`.

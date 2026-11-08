@@ -1,0 +1,30 @@
+[2026-11-08 20:07:59,934] TranQuyen/INFO/locust.main: Starting Locust 2.47.0
+[2026-11-08 20:07:59,941] TranQuyen/INFO/locust.main: Run time limit set to 251 seconds
+[2026-11-08 20:07:59,946] TranQuyen/INFO/locust.runners: Ramping to 5 users at a rate of 5.00 per second
+[2026-11-08 20:07:59,947] TranQuyen/INFO/locust.runners: All users spawned: {"ApplicationUser": 5} (5 total users)
+[2026-11-08 20:08:11,406] TranQuyen/INFO/locust.main: Shutting down (exit code 0)
+Type     Name                                                                          # reqs      # fails |    Avg     Min     Max    Med |   req/s  failures/s
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+DELETE   DELETE /api/tasks/:id                                                              0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+GET      GET /api/dashboard [7d]                                                            1     0(0.00%) |     12      12      12     12 |    0.14        0.00
+GET      GET /api/notes                                                                     2     0(0.00%) |      3       2       4      4 |    0.27        0.00
+GET      GET /api/projects                                                                  1     0(0.00%) |      5       5       5      5 |    0.14        0.00
+GET      GET /api/tasks                                                                     0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+GET      GET /api/tasks [filter]                                                            3     0(0.00%) |      4       3       6      5 |    0.41        0.00
+GET      GET /api/tasks [sort]                                                             11     0(0.00%) |      5       2      10      6 |    1.50        0.00
+POST     POST /api/auth/login                                                               0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+POST     POST /api/tasks                                                                    0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+         Aggregated                                                                        18     0(0.00%) |      5       2      12      6 |    2.46        0.00
+
+Response time percentiles (approximated)
+Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+GET      GET /api/dashboard [7d]                                                                13     13     13     13     13     13     13     13     13     13     13      1
+GET      GET /api/notes                                                                          5      5      5      5      5      5      5      5      5      5      5      2
+GET      GET /api/projects                                                                       5      5      5      5      5      5      5      5      5      5      5      1
+GET      GET /api/tasks [filter]                                                                 5      5      6      6      6      6      6      6      6      6      6      3
+GET      GET /api/tasks [sort]                                                                   6      7      7      7      7     11     11     11     11     11     11     11
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+         Aggregated                                                                              6      6      7      7     11     13     13     13     13     13     13     18
+

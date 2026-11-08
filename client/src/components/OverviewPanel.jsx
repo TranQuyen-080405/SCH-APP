@@ -1,38 +1,106 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  CalendarCheck2,
+  Check,
+  CircleCheck,
+  Clock3,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 import EmptyState from "./EmptyState.jsx";
 import { RATING_LABELS } from "./ReflectionForm.jsx";
 import { formatDay, formatShort, stampDay } from "../dates.js";
 import { getDashboard } from "../services/taskApi.js";
 
-function BarRow({ label, count, max, tone }) {
-  const width = max > 0 ? Math.max(count > 0 ? 4 : 0, Math.round((count / max) * 100)) : 0;
+function Metric({ label, value, note }) {
   return (
-    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)_2.25rem] items-center gap-2">
-      <span className="text-[13px] text-ink">{label}</span>
-      <span className="h-2.5 bg-line" aria-hidden="true">
-        <span className={`block h-2.5 ${tone}`} style={{ width: `${width}%` }} />
-      </span>
-      <span className="text-right text-[13px] text-ink tabular-nums">{count}</span>
-    </div>
+    <section className="flex min-w-0 flex-col items-center gap-1 px-2 py-2 text-center">
+      <p className="text-[26px] leading-8 font-light text-primary tabular-nums">
+        {value}
+      </p>
+      <h2 className="text-[11px] text-muted">{label}</h2>
+      {note && <p className="text-[11px] text-muted">{note}</p>}
+    </section>
   );
 }
 
 function StatusMix({ todo, doing, done }) {
-  const max = Math.max(todo, doing, done, 1);
   const total = todo + doing + done;
+  const segments = [
+    {
+      label: "Cần làm",
+      count: todo,
+      color: "var(--color-ochre)",
+      dot: "bg-ochre",
+    },
+    {
+      label: "Đang làm",
+      count: doing,
+      color: "var(--color-primary)",
+      dot: "bg-primary",
+    },
+    {
+      label: "Hoàn thành",
+      count: done,
+      color: "var(--color-forest)",
+      dot: "bg-forest",
+    },
+  ];
+  let offset = 0;
   return (
-    <section className="border border-line bg-surface p-4">
-      <h2 className="text-base font-semibold text-ink">Việc theo trạng thái</h2>
-      {total === 0 ? (
-        <p className="mt-3 text-sm text-muted">Chưa có việc nào.</p>
-      ) : (
-        <div className="mt-3 flex flex-col gap-2" aria-label="Số việc theo trạng thái">
-          <BarRow label="Cần làm" count={todo} max={max} tone="bg-todo-fg" />
-          <BarRow label="Đang làm" count={doing} max={max} tone="bg-doing-fg" />
-          <BarRow label="Hoàn thành" count={done} max={max} tone="bg-done-fg" />
+    <section className="rounded-card border border-line bg-surface p-6">
+      <h2 className="font-display text-xl font-normal">Phân bổ công việc</h2>
+      <div className="relative mx-auto my-6 size-44">
+        <svg
+          viewBox="0 0 110 110"
+          className="size-full -rotate-90"
+          role="img"
+          aria-label={`${todo} cần làm, ${doing} đang làm, ${done} hoàn thành`}
+        >
+          <circle
+            cx="55"
+            cy="55"
+            r="43"
+            fill="none"
+            stroke="var(--color-line)"
+            strokeWidth="12"
+          />
+          {segments.map((segment) => {
+            const size = total ? (segment.count / total) * 100 : 0;
+            const start = offset;
+            offset += size;
+            return (
+              <circle
+                key={segment.label}
+                cx="55"
+                cy="55"
+                r="43"
+                pathLength="100"
+                fill="none"
+                stroke={segment.color}
+                strokeWidth="12"
+                strokeDasharray={`${size} ${100 - size}`}
+                strokeDashoffset={-start}
+              />
+            );
+          })}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="font-display text-[36px] tabular-nums">{total}</span>
+          <span className="text-[12px] text-muted">Tổng công việc</span>
         </div>
-      )}
+      </div>
+      <ul className="flex flex-col gap-3">
+        {segments.map((segment) => (
+          <li key={segment.label} className="flex items-center gap-2 text-sm">
+            <span className={`size-2 rounded-full ${segment.dot}`} />
+            <span className="text-muted">{segment.label}</span>
+            <span className="ml-auto font-medium tabular-nums">
+              {segment.count}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -40,59 +108,96 @@ function StatusMix({ todo, doing, done }) {
 function WeekChart({ days, total }) {
   const max = Math.max(1, ...days.map((day) => day.count));
   return (
-    <section className="border border-line bg-surface p-4">
-      <h2 className="text-base font-semibold text-ink">Hoàn thành trong 7 ngày</h2>
-      {total === 0 ? (
-        <p className="mt-3 text-sm text-muted">Chưa có việc hoàn thành trong 7 ngày này.</p>
-      ) : (
-        <div className="mt-3 grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2">
-          <div className="flex h-24 flex-col justify-between text-[13px] text-muted tabular-nums">
-            <span>{max}</span>
-            <span>0</span>
-          </div>
-          <ol className="flex h-24 min-w-0 items-end border-b border-ink" aria-label="Số việc hoàn thành theo ngày">
-            {days.map((day) => {
-              const height = day.count === 0 ? 0 : Math.max(10, Math.round((day.count / max) * 80));
-              return (
-                <li key={day.date} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end">
-                  <span className="sr-only">{`${formatDay(day.date)}: ${day.count} việc`}</span>
-                  <span className="text-[13px] text-ink tabular-nums">{day.count}</span>
-                  <span
-                    className={`mt-0.5 w-full max-w-7 ${day.count > 0 ? "bg-primary" : ""}`}
-                    style={{ height: `${height}px` }}
-                  />
-                </li>
-              );
-            })}
-          </ol>
-          <span />
-          <ol className="flex min-w-0">
-            {days.map((day) => (
-              <li key={day.date} className="min-w-0 flex-1 pt-1 text-center text-[12px] text-muted">
-                {formatShort(day.date)}
-              </li>
-            ))}
-          </ol>
+    <section className="min-w-0 rounded-card border border-line bg-surface p-5 md:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="font-display text-xl font-normal">
+            Hoàn thành trong 7 ngày
+          </h2>
         </div>
-      )}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-sage px-3 py-1.5 text-[12px] font-medium text-success">
+          <CircleCheck size={14} aria-hidden="true" />
+          {total} việc đã xong
+        </span>
+      </div>
+      <div className="relative mt-8">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 flex h-44 flex-col justify-between"
+          aria-hidden="true"
+        >
+          {[0, 1, 2, 3].map((line) => (
+            <div key={line} className="border-t border-dashed border-line" />
+          ))}
+        </div>
+        <ol
+          className="relative grid h-44 grid-cols-7 gap-3"
+          aria-label="Số việc hoàn thành theo ngày"
+        >
+          {days.map((day) => (
+            <li
+              key={day.date}
+              className="flex min-w-0 flex-col items-center justify-end gap-2"
+            >
+              <span className="text-[12px] font-medium text-muted tabular-nums">
+                {day.count}
+              </span>
+              <span className="sr-only">
+                {formatDay(day.date)}: {day.count} công việc
+              </span>
+              <span
+                className={`block w-full max-w-10 rounded-t-md ${day.count > 0 ? "bg-primary" : "bg-line"}`}
+                style={{
+                  height:
+                    day.count > 0
+                      ? `${Math.max(5, (day.count / max) * 85)}%`
+                      : "3px",
+                }}
+              />
+            </li>
+          ))}
+        </ol>
+        <ol className="mt-3 grid grid-cols-7 gap-3">
+          {days.map((day) => (
+            <li key={day.date} className="text-center text-[12px] text-muted">
+              {formatShort(day.date)}
+            </li>
+          ))}
+        </ol>
+      </div>
+      <p className="mt-6 border-t border-line pt-4 text-[13px] text-muted">
+        {total === 0
+          ? "Chưa có việc hoàn thành trong 7 ngày này."
+          : `${total} công việc đã hoàn thành trong 7 ngày qua.`}
+      </p>
     </section>
   );
 }
 
 function DeadlineMix({ overdue, within }) {
-  const max = Math.max(overdue, within, 1);
   const total = overdue + within;
   return (
-    <section className="border border-line bg-surface p-4">
-      <h2 className="text-base font-semibold text-ink">Hạn của việc chưa xong</h2>
-      {total === 0 ? (
-        <p className="mt-3 text-sm text-muted">Không có việc chưa xong để so hạn.</p>
-      ) : (
-        <div className="mt-3 flex flex-col gap-2" aria-label="Việc quá hạn và còn hạn">
-          <BarRow label="Quá hạn" count={overdue} max={max} tone="bg-danger" />
-          <BarRow label="Còn hạn" count={within} max={max} tone="bg-primary" />
-        </div>
-      )}
+    <section className="rounded-card border border-line bg-surface p-6">
+      <h2 className="font-display text-xl font-normal">Theo dõi thời hạn</h2>
+      <p className="mt-1 text-[13px] text-muted">Công việc chưa hoàn thành</p>
+      <div className="mt-6 flex items-center gap-3 rounded-control bg-peach p-4">
+        <Clock3 size={20} className="text-terracotta" aria-hidden="true" />
+        <span className="text-sm text-muted">Đã quá hạn</span>
+        <span className="ml-auto text-xl font-semibold text-danger tabular-nums">
+          {overdue}
+        </span>
+      </div>
+      <div className="mt-3 flex items-center gap-3 rounded-control bg-sage p-4">
+        <CalendarCheck2 size={20} className="text-forest" aria-hidden="true" />
+        <span className="text-sm text-muted">Chưa quá hạn</span>
+        <span className="ml-auto text-xl font-semibold text-success tabular-nums">
+          {within}
+        </span>
+      </div>
+      <p className="mt-5 text-[12px] leading-5 text-muted">
+        {total
+          ? "Việc không có ngày đến hạn được tính vào nhóm chưa quá hạn."
+          : "Bạn chưa có công việc đang chờ hoàn thành."}
+      </p>
     </section>
   );
 }
@@ -107,11 +212,15 @@ export default function OverviewPanel({ revision = 0, onOpen, onSeeAll }) {
   useEffect(() => {
     const id = ++requestId.current;
     let live = true;
-    getDashboard("7d")
+    getDashboard()
       .then((dash) => {
         if (!live || id !== requestId.current) return;
         const data = dash?.dashboard;
-        if (!data || !Array.isArray(data.dailyCompletions) || !Array.isArray(data.recentCompleted)) {
+        if (
+          !data ||
+          !Array.isArray(data.trend) ||
+          !Array.isArray(data.recentCompleted)
+        ) {
           setStatus("error");
           return;
         }
@@ -134,83 +243,123 @@ export default function OverviewPanel({ revision = 0, onOpen, onSeeAll }) {
   const completion = dashboard?.completion;
   const done = Number(completion?.done) || 0;
   const total = Number(completion?.total) || 0;
-  const doing = Number(dashboard?.doingCount) || 0;
-  const overdue = Number(dashboard?.overdueCount) || 0;
-  const todo = Math.max(0, total - done - doing);
-  const within = Math.max(0, total - done - overdue);
-  const days = dashboard?.dailyCompletions || [];
-  const recent = dashboard?.recentCompleted || [];
+  const doing = Number(dashboard?.doing) || 0;
+  const overdue = Number(dashboard?.overdue) || 0;
+  const completed = Number(dashboard?.completed) || 0;
+  const rate = completion?.rate == null ? "—" : `${Math.round(completion.rate * 100)}%`;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="hidden md:block">
-        <h1 className="text-2xl font-semibold text-ink">Tổng quan</h1>
-        <p className="mt-1 text-sm text-muted">Số việc của bạn, không phải điểm năng suất.</p>
+    <div className="flex flex-col gap-5">
+      <div>
+        <h1 className="font-display text-[32px] leading-tight font-normal tracking-tight md:text-[44px]">
+          Tổng quan
+        </h1>
       </div>
-
-      {status === "loading" ? (
-        <div className="flex flex-col gap-3" aria-busy="true">
+      {status === "loading" && (
+        <div className="grid grid-cols-2 gap-4" aria-busy="true">
           <p className="sr-only">Đang tải tổng quan</p>
-          <div className="h-28 animate-pulse border border-line bg-line" />
-          <div className="h-40 animate-pulse border border-line bg-line" />
+          {[0, 1, 2, 3].map((id) => (
+            <div key={id} className="h-28 animate-pulse rounded-card bg-line" />
+          ))}
         </div>
-      ) : null}
-
-      {status === "error" || status === "network" ? (
+      )}
+      {(status === "error" || status === "network") && (
         <EmptyState
           variant="error"
-          message={status === "network" ? "Không kết nối được máy chủ." : "Không thể tải tổng quan"}
+          message={
+            status === "network"
+              ? "Không kết nối được máy chủ."
+              : "Không thể tải tổng quan"
+          }
           onRetry={() => {
             setStatus("loading");
             setAttempt((value) => value + 1);
           }}
         />
-      ) : null}
-
-      {status === "ready" && dashboard ? (
+      )}
+      {status === "ready" && dashboard && (
         <>
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <StatusMix todo={todo} doing={doing} done={done} />
-            <DeadlineMix overdue={overdue} within={within} />
+          <div className="grid grid-cols-2 divide-x divide-line overflow-hidden rounded-card bg-surface py-4 sm:grid-cols-4">
+            <Metric label="Đã xong (7 ngày)" value={completed} />
+            <Metric label="Đang làm" value={doing} />
+            <Metric label="Quá hạn" value={overdue} />
+            <Metric
+              label="Tỷ lệ hoàn thành"
+              value={rate}
+              note="Toàn bộ công việc"
+            />
           </div>
-          <WeekChart days={days} total={Number(dashboard.completedLast7Days) || 0} />
-
-          <section>
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-base font-semibold text-ink">Hoàn thành gần đây</h2>
-              <button type="button" className="h-11 shrink-0 px-2 text-sm font-medium text-primary" onClick={onSeeAll}>
-                Xem tất cả
-              </button>
-            </div>
-            <p className="text-[13px] text-muted">Tối đa 5 việc, mới hoàn thành trước. Bấm tên để mở việc.</p>
-            {recent.length === 0 ? (
-              <p className="mt-2 text-sm text-muted">Chưa có công việc hoàn thành.</p>
-            ) : (
-              <ul className="mt-2 border-t border-line">
-                {recent.map((task) => {
-                  const when = task.completedAt ? formatDay(stampDay(task.completedAt)) : "Chưa có ngày";
-                  const rating = RATING_LABELS[task.outcomeRating];
-                  return (
-                    <li key={task.id} className="border-b border-line">
-                      <button type="button" className="grid w-full grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-2 text-left" onClick={() => onOpen(task)}>
-                        <span className="text-[13px] text-muted">{when}</span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-[15px] font-semibold text-ink">{task.title}</span>
-                          {rating || task.outcomeNote ? (
-                            <span className="mt-0.5 block truncate text-[13px] text-muted">
-                              {[rating, task.outcomeNote].filter(Boolean).join(" · ")}
+          <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+            <WeekChart days={dashboard.trend} total={completed} />
+            <StatusMix
+              todo={Math.max(0, total - done - doing)}
+              doing={doing}
+              done={done}
+            />
+          </div>
+          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+            <section className="min-w-0 rounded-card border border-line bg-surface p-5 md:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-display text-xl font-normal">
+                  Hoàn thành gần đây
+                </h2>
+                <button
+                  type="button"
+                  className="flex min-h-11 shrink-0 items-center gap-1 text-sm font-medium text-primary"
+                  onClick={onSeeAll}
+                >
+                  Xem tất cả <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </div>
+              {dashboard.recentCompleted.length === 0 ? (
+                <p className="py-8 text-sm text-muted">
+                  Chưa có công việc hoàn thành.
+                </p>
+              ) : (
+                <ul className="mt-2 divide-y divide-line">
+                  {dashboard.recentCompleted.map((task) => (
+                    <li key={task.id}>
+                      <button
+                        type="button"
+                        className="flex w-full items-start gap-3 rounded-control py-4 text-left hover:bg-canvas"
+                        onClick={() => onOpen(task)}
+                      >
+                        <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-sage text-forest">
+                          <Check size={16} aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">
+                            {task.title}
+                          </span>
+                          {(task.outcomeRating || task.outcomeNote) && (
+                            <span className="mt-1 block truncate text-[12px] text-muted">
+                              {[
+                                RATING_LABELS[task.outcomeRating],
+                                task.outcomeNote,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
                             </span>
-                          ) : null}
+                          )}
+                        </span>
+                        <span className="pt-1 text-[12px] whitespace-nowrap text-muted">
+                          {task.completedAt
+                            ? formatDay(stampDay(task.completedAt))
+                            : "Chưa có ngày"}
                         </span>
                       </button>
                     </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <DeadlineMix
+              overdue={overdue}
+              within={Math.max(0, total - done - overdue)}
+            />
+          </div>
         </>
-      ) : null}
+      )}
     </div>
   );
 }

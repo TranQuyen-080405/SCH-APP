@@ -3,17 +3,27 @@ import { useNavigate } from "react-router";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import ReflectionForm from "../components/ReflectionForm.jsx";
 import TaskForm from "../components/TaskForm.jsx";
+import { useProjects } from "../components/ProjectContext.jsx";
 import Toast from "../components/Toast.jsx";
 import { splitError } from "../services/api.js";
 import { createTask, deleteTask, updateTask } from "../services/taskApi.js";
 
 export function useTaskEditor(reload) {
+  const { projects, refreshProjects } = useProjects();
   const navigate = useNavigate();
   const reloadRef = useRef(reload);
   const savingRef = useRef(false);
   const reflectingRef = useRef(false);
   const pendingRef = useRef(new Set());
   reloadRef.current = reload;
+
+  async function refresh() {
+    const [result] = await Promise.all([
+      reloadRef.current?.(),
+      refreshProjects(),
+    ]);
+    return result;
+  }
 
   const [pendingIds, setPendingIds] = useState(() => new Set());
   const [formMode, setFormMode] = useState(null);
@@ -86,14 +96,21 @@ export function useTaskEditor(reload) {
     setSaving(true);
     setFormError(null);
     try {
-      const saved = formMode === "create" ? await createTask(body) : await updateTask(editing.id, body);
-      const becameDone = body.status === "done" && (formMode === "create" || editing?.status !== "done");
-      showToast(formMode === "create" ? "Đã thêm công việc" : "Đã lưu công việc");
+      const saved =
+        formMode === "create"
+          ? await createTask(body)
+          : await updateTask(editing.id, body);
+      const becameDone =
+        body.status === "done" &&
+        (formMode === "create" || editing?.status !== "done");
+      showToast(
+        formMode === "create" ? "Đã thêm công việc" : "Đã lưu công việc",
+      );
       setFormMode(null);
       setEditing(null);
       setActionError("");
       if (becameDone && saved?.task) setOffer(saved.task);
-      await reloadRef.current?.();
+      await refresh();
     } catch (error) {
       if (!leave(error)) setFormError(splitError(error));
     } finally {
@@ -113,7 +130,7 @@ export function useTaskEditor(reload) {
       setReflectTask(null);
       setOffer(null);
       setActionError("");
-      await reloadRef.current?.();
+      await refresh();
     } catch (error) {
       if (!leave(error)) setReflectError(splitError(error));
     } finally {
@@ -127,17 +144,19 @@ export function useTaskEditor(reload) {
     pendingRef.current.add(task.id);
     setPendingIds(new Set(pendingRef.current));
     setTasks?.((current) =>
-      current.map((item) => (item.id === task.id ? { ...item, status: next } : item)),
+      current.map((item) =>
+        item.id === task.id ? { ...item, status: next } : item,
+      ),
     );
     try {
       const saved = await updateTask(task.id, { status: next });
       if (next === "done" && saved?.task) setOffer(saved.task);
       else setOffer((current) => (current?.id === task.id ? null : current));
       setActionError("");
-      await reloadRef.current?.();
+      await refresh();
     } catch (error) {
       if (!leave(error)) {
-        const reloaded = await reloadRef.current?.();
+        const reloaded = await refresh();
         if (reloaded) setActionError(error.message);
       }
     } finally {
@@ -156,7 +175,7 @@ export function useTaskEditor(reload) {
       setOffer((current) => (current?.id === id ? null : current));
       showToast("Đã xóa công việc");
       setActionError("");
-      await reloadRef.current?.();
+      await refresh();
     } catch (error) {
       if (!leave(error)) {
         setPendingDelete(null);
@@ -196,6 +215,7 @@ export function useTaskEditor(reload) {
     <>
       {formMode ? (
         <TaskForm
+          projects={projects}
           mode={formMode}
           initial={formMode === "edit" ? editing : createInitial}
           submitting={saving}
@@ -225,7 +245,13 @@ export function useTaskEditor(reload) {
           if (!deleting) setPendingDelete(null);
         }}
       />
-      {toast ? <Toast key={toast.id} message={toast.message} onDone={() => setToast(null)} /> : null}
+      {toast ? (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          onDone={() => setToast(null)}
+        />
+      ) : null}
     </>
   );
 
@@ -236,7 +262,6 @@ export function useTaskEditor(reload) {
     requestDelete: setPendingDelete,
     pendingIds,
     actionError,
-    setActionError,
     banner,
     ui,
   };

@@ -1,0 +1,28 @@
+[
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 900
+    },
+    "touch": false,
+    "extract_keeps_frames": "pass",
+    "snap_and_reload": "pass",
+    "occupied_slot_rejected": "pass",
+    "keyboard_dock": "pass",
+    "failed_save_rollback": "pass",
+    "page_errors": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "touch": true,
+    "extract_keeps_frames": "pass",
+    "snap_and_reload": "pass",
+    "occupied_slot_rejected": "pass",
+    "keyboard_dock": "pass",
+    "failed_save_rollback": "pass",
+    "page_errors": []
+  }
+]

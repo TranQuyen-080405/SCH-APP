@@ -1,0 +1,10 @@
+\section{Kết luận}
+
+Phiên bản refactor 09/11/2026 đạt 75/75 test (63 backend, 12 frontend),
+build client thành công. Migration local giữ nguyên 5 tài khoản, 1 dự án,
+22 công việc và 10 ghi chú; 12 công việc trước đây ưu tiên trung bình đã chuyển thành không gắn ưu tiên.
+Kiểm tra toàn vẹn và khóa ngoại SQLite đều đạt.
+
+Benchmark 100--1.000 users ngày 08/11 là kết quả của phiên bản trước refactor;
+P95 tại 1.000 users là 1100 ms. Chưa chạy lại đủ bốn mức tải trên bản mới,
+chưa kiểm thử đầy đủ thao tác trình duyệt và hạ tầng production.

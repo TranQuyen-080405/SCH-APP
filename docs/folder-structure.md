@@ -1,154 +1,92 @@
-# Folder structure — Personal Task Management
-
-Repo hiện tại là `schedule_app/`. Lộ trình ghi tên `task-management/`; đó là tên logic, không đổi tên thư mục.
-
-Chỉ tạo file khi tới atom task tương ứng. Mỗi file một trách nhiệm.
-
-```text
-schedule_app/
-├── client/
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx
-│       ├── index.css
-│       ├── components/
-│       │   ├── ProtectedRoute.jsx
-│       │   ├── AppHeader.jsx
-│       │   ├── StatusTabs.jsx
-│       │   ├── SortSelect.jsx
-│       │   ├── TaskList.jsx
-│       │   ├── TaskItem.jsx
-│       │   ├── StatusSelect.jsx
-│       │   ├── PriorityBadge.jsx
-│       │   ├── TaskForm.jsx
-│       │   ├── ConfirmDialog.jsx
-│       │   ├── EmptyState.jsx
-│       │   ├── FormField.jsx
-│       │   ├── Toast.jsx
-│       │   ├── ViewNav.jsx
-│       │   ├── OverviewPanel.jsx
-│       │   └── ReflectionForm.jsx
-│       ├── pages/
-│       │   ├── LoginPage.jsx
-│       │   ├── RegisterPage.jsx
-│       │   └── DashboardPage.jsx
-│       └── services/
-│           ├── api.js
-│           ├── authApi.js
-│           └── taskApi.js
-├── server/
-│   ├── package.json
-│   ├── .env.example
-│   ├── data/                    gitignore *.db
-│   │   └── app.db
-│   ├── src/
-│   │   ├── server.js
-│   │   ├── app.js
-│   │   ├── errors.js
-│   │   ├── routes/
-│   │   │   ├── authRoutes.js
-│   │   │   ├── taskRoutes.js
-│   │   │   └── dashboardRoutes.js
-│   │   ├── controllers/
-│   │   │   ├── authController.js
-│   │   │   ├── taskController.js
-│   │   │   └── dashboardController.js
-│   │   ├── services/
-│   │   │   ├── password.js
-│   │   │   ├── authService.js
-│   │   │   └── taskService.js
-│   │   ├── repositories/
-│   │   │   ├── userRepository.js
-│   │   │   └── taskRepository.js
-│   │   ├── middleware/
-│   │   │   ├── requireAuth.js
-│   │   │   ├── checkOrigin.js
-│   │   │   └── errorHandler.js
-│   │   └── db/
-│   │       ├── connection.js
-│   │       └── schema.sql
-│   └── test/
-│       └── api.test.js
-├── docs/
-│   ├── plan.md
-│   ├── erd.md
-│   ├── user-flow.md
-│   ├── use-cases.md
-│   ├── api-contract.md
-│   ├── tech-stack.md
-│   ├── checklist.md
-│   ├── atom-tasks.md
-│   ├── folder-structure.md
-│   └── ui_docs/
-│       ├── ui_lead.md
-│       ├── design-system.md
-│       ├── screens.md
-│       ├── components.md
-│       ├── ux-states.md
-│       └── ui-tasks.md
-├── .gitignore
-└── README.md
-```
-
-## File nào làm gì
-
-### Client
-
-| File | Việc |
-| --- | --- |
-| `vite.config.js` | Cổng 5173, proxy `/api` → `http://localhost:3000` |
-| `main.jsx` | `BrowserRouter` bọc `App` |
-| `App.jsx` | Khai báo route `/`, `/login`, `/register`, và route lạ |
-| `index.css` | Token Tailwind. Không viết CSS riêng cho từng component |
-| `services/api.js` | `fetch` JSON tới `/api`, đọc `{ error }`, nếu 401 thì báo cho app biết session đã mất |
-| `services/authApi.js` | `register`, `login`, `logout`, `me` |
-| `services/taskApi.js` | `list`, `create`, `update`, `remove`, `getDashboard`, `listRecentDone` |
-| `components/ProtectedRoute.jsx` | Gọi `me`. 401 thì `<Navigate to="/login" />`. Đang tải thì hiện "Đang tải..." |
-| `pages/RegisterPage.jsx` | Form UC-01, thành công thì sang `/login` |
-| `pages/LoginPage.jsx` | Form UC-02, thành công thì sang `/` |
-| `pages/DashboardPage.jsx` | Giữ tab, sắp xếp, form, dialog; gọi lại list sau mỗi lần ghi |
-| Các component UI | Việc từng file nằm ở `docs/ui_docs/components.md` |
-
-### Server
-
-| File | Việc |
-| --- | --- |
-| `server.js` | Đọc env, thiếu `SESSION_SECRET` thì thoát, `app.listen(PORT)` |
-| `app.js` | `express.json()`, session, gắn router, error handler cuối cùng |
-| `errors.js` | `HttpError(status, message)` để service ném ra |
-| `db/connection.js` | Mở SQLite, `pragma('foreign_keys', 'ON')`, chạy `schema.sql` |
-| `db/schema.sql` | DDL trong `docs/erd.md` |
-| `repositories/userRepository.js` | `create`, `findByEmail`, `findById` |
-| `repositories/taskRepository.js` | `create`, `list`, `update`, `delete` — mọi hàm nhận `userId` |
-| `services/password.js` | `hashPassword`, `verifyPassword` đúng tham số ở `docs/tech-stack.md` |
-| `services/authService.js` | Đăng ký, đăng nhập. Không đụng `req` |
-| `services/taskService.js` | Validate BR-05 đến BR-09, BR-14, BR-15. Không thấy task thì 404 |
-| `controllers/authController.js` | Gọi auth service, ghi `req.session.userId`, trả JSON |
-| `controllers/taskController.js` | Lấy `req.session.userId`, gọi task service |
-| `routes/authRoutes.js` | Bốn route auth |
-| `routes/taskRoutes.js` | CRUD task, có `checkOrigin` và `requireAuth` |
-| `routes/dashboardRoutes.js` | `GET /api/dashboard`, có `requireAuth` |
-| `controllers/dashboardController.js` | Lấy `req.session.userId`, gọi `taskService.dashboard` |
-| `middleware/requireAuth.js` | Không có `session.userId` thì 401 |
-| `middleware/checkOrigin.js` | Origin lạ trên POST/PATCH/DELETE thì 403 |
-| `middleware/errorHandler.js` | `HttpError` ra đúng status. Lỗi lạ ra 500 `{ "error": "Lỗi máy chủ" }` và log ở server |
-| `test/api.test.js` | TC01–TC10 |
-
-`data/` do server tạo lúc chạy. Không commit file `.db`.
+# Cấu trúc source hiện tại — 09/11/2026
 
 ## Hướng phụ thuộc
 
+Client: App → ProtectedRoute/AppShell → pages → components/hooks → services/*Api → request → HTTP.
+Server: routes → middleware → controllers → services → repositories → db/connection.
+`server/src/validation.js` dùng chung asObject, parseId, isCalendarDate; các service không phụ thuộc lẫn nhau để lấy validation.
+
+## File nào làm gì
+
+- TasksPage: tìm kiếm, lọc, nhóm theo dự án, thêm nhanh; useTaskEditor dùng chung cho Tasks/Calendar/Overview.
+- TaskForm, PriorityBadge: chỉ low/high và không gắn ưu tiên; không còn StatusTabs.
+- OverviewPanel: một getDashboard() cho số liệu, biểu đồ 7 ngày và 5 việc gần đây.
+- ProjectContext: CRUD dự án và số việc chưa xong; TaskSidebar hiển thị bộ lọc/dự án.
+- NotesContext: CRUD ghi chú và giấy nổi xuyên route; NoteBoard/NoteCard/NoteEditor dựng UI.
+- taskViews, dates, noteLayout: logic trình bày và ngày; có test frontend.
+- app.js: CORS, session, 5 router, frontend build, error handler. server.js: khởi động và seed.
+- db/connection: transaction schema/migration, ưu tiên nullable, index đúng truy vấn, đóng kết nối khi lỗi.
+- Không có GET chi tiết ghi chú: UI dùng dữ liệu GET danh sách. Các helper chỉ dùng bởi test hoặc bảo đảm auth vẫn được giữ.
+
+## Danh sách file nguồn
+
 ```text
-routes -> controllers -> services -> repositories -> db/connection
-                middleware đứng trước controller
-client pages -> components -> services/*Api -> api.js -> /api
+client/src/App.jsx
+client/src/components/AppShell.jsx
+client/src/components/ConfirmDialog.jsx
+client/src/components/EmptyState.jsx
+client/src/components/FormField.jsx
+client/src/components/NoteBoard.jsx
+client/src/components/NoteCard.jsx
+client/src/components/NoteEditor.jsx
+client/src/components/NotesContext.jsx
+client/src/components/OverviewPanel.jsx
+client/src/components/PriorityBadge.jsx
+client/src/components/ProjectContext.jsx
+client/src/components/ProjectForm.jsx
+client/src/components/ProtectedRoute.jsx
+client/src/components/ReflectionForm.jsx
+client/src/components/SortSelect.jsx
+client/src/components/StatusSelect.jsx
+client/src/components/TaskForm.jsx
+client/src/components/TaskItem.jsx
+client/src/components/TaskList.jsx
+client/src/components/TaskSidebar.jsx
+client/src/components/Toast.jsx
+client/src/dates.js
+client/src/hooks/useTaskEditor.jsx
+client/src/index.css
+client/src/main.jsx
+client/src/noteLayout.js
+client/src/pages/CalendarPage.jsx
+client/src/pages/LoginPage.jsx
+client/src/pages/NotesPage.jsx
+client/src/pages/OverviewPage.jsx
+client/src/pages/RegisterPage.jsx
+client/src/pages/TasksPage.jsx
+client/src/services/api.js
+client/src/services/authApi.js
+client/src/services/noteApi.js
+client/src/services/projectApi.js
+client/src/services/taskApi.js
+client/src/taskViews.js
+server/src/app.js
+server/src/controllers/authController.js
+server/src/controllers/dashboardController.js
+server/src/controllers/noteController.js
+server/src/controllers/projectController.js
+server/src/controllers/taskController.js
+server/src/db/connection.js
+server/src/db/schema.sql
+server/src/db/seedDemo.js
+server/src/errors.js
+server/src/middleware/checkOrigin.js
+server/src/middleware/errorHandler.js
+server/src/middleware/requireAuth.js
+server/src/repositories/noteRepository.js
+server/src/repositories/projectRepository.js
+server/src/repositories/taskRepository.js
+server/src/repositories/userRepository.js
+server/src/routes/authRoutes.js
+server/src/routes/dashboardRoutes.js
+server/src/routes/noteRoutes.js
+server/src/routes/projectRoutes.js
+server/src/routes/taskRoutes.js
+server/src/server.js
+server/src/services/authService.js
+server/src/services/noteService.js
+server/src/services/password.js
+server/src/services/projectService.js
+server/src/services/taskService.js
+server/src/validation.js
 ```
-
-Repository không import service. Service không import Express. Component không viết câu SQL và không kiểm tra `user_id`.
-
-## File không tạo
-
-Không tạo `models/`, `utils/` gom chung, lớp DTO, file config abstraction, Kanban, hay store Redux. Một hàm dùng một nơi thì để ngay file đó.

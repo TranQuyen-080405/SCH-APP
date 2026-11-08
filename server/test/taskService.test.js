@@ -58,11 +58,6 @@ describe("task service validation", { concurrency: false }, () => {
     assert.deepEqual([early.status, early.message], [400, "Chỉ ghi nhận kết quả khi công việc đã hoàn thành"]);
   });
 
-  test("period sai", async () => {
-    const err = await httpError(() => taskService.dashboard(1, { period: "1d" }));
-    assert.deepEqual([err.status, err.message], [400, "Khoảng thời gian không hợp lệ"]);
-  });
-
   test("hoàn thành không bắt buộc ghi chú, mở lại giữ ghi chú", async () => {
     const owner = userRepository.create({ email: "own@b.com", passwordHash: "x" });
     const other = userRepository.create({ email: "oth@b.com", passwordHash: "x" });
@@ -118,8 +113,7 @@ describe("task service validation", { concurrency: false }, () => {
   test("dashboard đếm theo +07 và không bịa khi rỗng", () => {
     const now = new Date("2026-11-04T02:00:00.000Z");
     const empty = userRepository.create({ email: "empty@b.com", passwordHash: "x" });
-    const blank = taskService.dashboard(empty.id, {}, now);
-    assert.equal(blank.period, "7d");
+    const blank = taskService.dashboard(empty.id, now);
     assert.equal(blank.completed, 0);
     assert.equal(blank.doing, 0);
     assert.equal(blank.overdue, 0);
@@ -129,11 +123,6 @@ describe("task service validation", { concurrency: false }, () => {
       ["2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04"],
     );
     assert.ok(blank.trend.every((day) => day.count === 0));
-    assert.equal(blank.completedLast7Days, 0);
-    assert.equal(blank.doingCount, 0);
-    assert.equal(blank.overdueCount, 0);
-    assert.equal(blank.completionRate, null);
-    assert.equal(blank.dailyCompletions.length, 7);
     assert.deepEqual(blank.recentCompleted, []);
 
     const owner = userRepository.create({ email: "stats@b.com", passwordHash: "x" });
@@ -154,7 +143,7 @@ describe("task service validation", { concurrency: false }, () => {
     insert.run(owner.id, "todo quá hạn", "2026-11-03", "todo", null);
     insert.run(other.id, "của người khác", "2026-11-01", "done", "2026-11-04T01:00:00.000Z");
 
-    const week = taskService.dashboard(owner.id, { period: "7d" }, now);
+    const week = taskService.dashboard(owner.id, now);
     assert.equal(week.completed, 3);
     assert.equal(week.doing, 2);
     assert.equal(week.overdue, 2);
@@ -162,28 +151,14 @@ describe("task service validation", { concurrency: false }, () => {
     assert.equal(week.trend.at(-1).count, 1);
     assert.equal(week.trend.find((day) => day.date === "2026-11-03").count, 1);
     assert.equal(week.trend.find((day) => day.date === "2026-10-29").count, 1);
-    assert.equal(week.completedLast7Days, 3);
-    assert.equal(week.doingCount, 2);
-    assert.equal(week.overdueCount, 2);
-    assert.equal(week.completionRate, 60);
-    assert.equal(week.dailyCompletions.at(-1).count, 1);
     assert.equal(week.recentCompleted.length, 5);
     assert.equal(week.recentCompleted[0].title, "mốc hôm nay");
 
-    const month = taskService.dashboard(owner.id, { period: "30d" }, now);
-    assert.equal(month.trend.length, 30);
-    assert.equal(month.trend[0].date, "2026-10-06");
-    assert.equal(month.completed, 4);
-    assert.equal(month.doing, week.doing);
-    assert.equal(month.overdue, week.overdue);
-    assert.equal(month.completion.rate, week.completion.rate);
-
-    const foreign = taskService.dashboard(other.id, { period: "7d" }, now);
+    const foreign = taskService.dashboard(other.id, now);
     assert.equal(foreign.completed, 1);
     assert.equal(foreign.completion.total, 1);
     assert.equal(foreign.overdue, 0);
     assert.equal(foreign.recentCompleted.length, 1);
-    assert.equal(foreign.completionRate, 100);
   });
 
   after(() => {

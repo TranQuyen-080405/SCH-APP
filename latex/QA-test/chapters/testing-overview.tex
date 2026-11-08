@@ -1,0 +1,14 @@
+\section{Tổng quan kiểm thử}
+
+\subsection{Mục tiêu và phạm vi}
+Kiểm tra đăng ký, phiên đăng nhập, phân quyền giữa tài khoản, CRUD công việc,
+dự án, ghi chú và thống kê; đo hiệu năng API với Locust.
+
+\subsection{Môi trường kiểm thử}
+Windows, Intel Core i5-12450H (8 lõi, 12 luồng), RAM khả dụng cho hệ điều hành
+15,71 GiB; Node.js 26.13.0, Python 3.11.9, Locust 2.47.0.
+Express và SQLite chạy trong một tiến trình Node.js; máy sinh tải dùng chung máy.
+Đo trên localhost, database thử nghiệm riêng; không tác động dữ liệu sử dụng.
+
+Đợt kiểm tra mới nhất: 09/11/2026, sau refactor UI/API/schema.
+Benchmark ngày 08/11/2026 là dữ liệu lịch sử của bản trước refactor.

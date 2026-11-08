@@ -28,7 +28,7 @@ const TASKS = [
     title: "Họp giao ban đầu tuần",
     description: "Đi qua việc tồn và chốt người làm báo cáo.",
     deadline: "2026-10-20",
-    priority: "medium",
+    priority: null,
     status: "done",
     createdAt: atVietnam("2026-10-19", 16, 0),
     completedAt: atVietnam("2026-10-20", 8, 30),
@@ -64,7 +64,7 @@ const TASKS = [
     title: "Gọi điện xác nhận lịch với chị Hà",
     description: "Nhắc cuộc hẹn thứ hai tuần sau.",
     deadline: "2026-10-31",
-    priority: "medium",
+    priority: null,
     status: "done",
     createdAt: atVietnam("2026-10-30", 9, 30),
     completedAt: atVietnam("2026-10-31", 10, 15),
@@ -88,7 +88,7 @@ const TASKS = [
     title: "Ôn bài chương 3 môn xác suất",
     description: "Làm lại bài tập biến ngẫu nhiên.",
     deadline: "2026-11-02",
-    priority: "medium",
+    priority: null,
     status: "done",
     createdAt: atVietnam("2026-11-01", 19, 0),
     completedAt: atVietnam("2026-11-02", 21, 10),
@@ -112,7 +112,7 @@ const TASKS = [
     title: "Soạn biên bản họp sáng",
     description: "Ghi quyết định và người phụ trách.",
     deadline: "2026-11-04",
-    priority: "medium",
+    priority: null,
     status: "done",
     createdAt: atVietnam("2026-11-04", 7, 30),
     completedAt: atVietnam("2026-11-04", 8, 40),
@@ -148,7 +148,7 @@ const TASKS = [
     title: "Học lại phần SQL join",
     description: "Xem lại bài tập nối bảng đơn hàng.",
     deadline: "2026-11-01",
-    priority: "medium",
+    priority: null,
     status: "doing",
     createdAt: atVietnam("2026-10-30", 20, 0),
     completedAt: null,
@@ -172,7 +172,7 @@ const TASKS = [
     title: "Mua quà sinh nhật mẹ",
     description: "Ghé hiệu sách, chọn một cuốn mẹ đang đọc dở.",
     deadline: "2026-11-06",
-    priority: "medium",
+    priority: null,
     status: "todo",
     createdAt: atVietnam("2026-11-02", 12, 0),
     completedAt: null,
@@ -196,7 +196,7 @@ const TASKS = [
     title: "Ôn thi giữa kỳ môn kinh tế",
     description: "Đọc lại chương cung cầu và làm đề cũ.",
     deadline: "2026-11-18",
-    priority: "medium",
+    priority: null,
     status: "doing",
     createdAt: atVietnam("2026-11-04", 6, 30),
     completedAt: null,
@@ -208,7 +208,7 @@ const TASKS = [
     title: "Gọi điện cho khách hàng miền Nam",
     description: "Hỏi lại lịch giao quý tới.",
     deadline: "2026-11-20",
-    priority: "medium",
+    priority: null,
     status: "todo",
     createdAt: atVietnam("2026-11-03", 11, 20),
     completedAt: null,
@@ -312,8 +312,8 @@ export async function seedDemo(db) {
     "SELECT 1 AS ok FROM notes WHERE id = ? OR (user_id = ? AND title = ? AND noted_on = ?)",
   );
   const insertNote = db.prepare(
-    `INSERT INTO notes (id, user_id, title, content, noted_on, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO notes (id, user_id, title, content, noted_on, color, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
 
   const apply = db.transaction((userId) => {
@@ -336,7 +336,7 @@ export async function seedDemo(db) {
     for (const note of NOTES) {
       const stamp = atVietnam(note.notedOn, 21, 0);
       if (noteTaken.get(note.id, userId, note.title, note.notedOn)) continue;
-      insertNote.run(note.id, userId, note.title, note.content, note.notedOn, stamp, stamp);
+      insertNote.run(note.id, userId, note.title, note.content, note.notedOn, note.id % 4, stamp, stamp);
     }
   });
   apply(user.id);

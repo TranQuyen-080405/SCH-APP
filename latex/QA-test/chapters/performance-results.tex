@@ -1,0 +1,103 @@
+\subsection{Kiểm thử hiệu năng}
+
+\textbf{Kết quả lịch sử trước refactor 09/11/2026.} Chưa đo lại bốn mức tải cho phiên bản hiện tại; không dùng các số này để nghiệm thu bản mới.
+
+Ngày đo: 2026-11-08; Locust 2.47.0.
+
+Mỗi mức đặt thời gian đo 300 giây; chờ tối đa 5 giây để request dở dang kết thúc. Cột giây ghi thời gian thực tế, gồm phần chờ kết thúc. Không tính đăng nhập và warm-up.
+
+P50/P95/P99 là phân vị latency (ms), được Locust làm tròn theo histogram.
+
+\subsubsection*{A. Application performance}
+
+\begin{center}\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrrrrrrr@{}}
+\toprule
+\textbf{Users} & \textbf{Giây} & \textbf{Requests} & \textbf{RPS} & \textbf{TB (ms)} & \textbf{P50} & \textbf{P95} & \textbf{P99} & \textbf{Lỗi (\%)} \\
+\midrule
+100 & 300.16 & 15555 & 51.99 & 9.86 & 6 & 25 & 110 & 0.00 \\
+300 & 300.14 & 46859 & 156.21 & 10.36 & 8 & 27 & 44 & 0.00 \\
+500 & 300.15 & 78119 & 260.66 & 7.04 & 6 & 15 & 21 & 0.00 \\
+1000 & 301.67 & 132004 & 437.65 & 281.86 & 21 & 1100 & 1400 & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Ở 1.000 users, P95 là 1100 ms, so với 25 ms ở 100 users. Tổng số request lỗi trong bốn mức tải: 0.
+
+\subsubsection*{B. Infrastructure performance}
+
+\begin{center}\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+\textbf{Users} & \textbf{CPU TB/đỉnh (\%)} & \textbf{RSS TB/đỉnh (MiB)} & \textbf{CPU máy TB (\%)} \\
+\midrule
+100 & 11.73/33.80 & 220.28/236.12 & 44.17 \\
+300 & 29.85/56.10 & 243.77/263.25 & 32.42 \\
+500 & 30.45/59.70 & 249.78/270.84 & 23.09 \\
+1000 & 49.62/76.80 & 264.21/288.10 & 33.93 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+CPU/RSS thuộc tiến trình Node (gồm SQLite); CPU 100\% tương đương một logical CPU.
+
+\begin{center}\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+\textbf{Users} & \textbf{Disk đọc/ghi (KiB/s)} & \textbf{NIC nhận/gửi (KiB/s)} \\
+\midrule
+100 & 2078.99/2606.50 & 1838.44/99.54 \\
+300 & 2295.60/2518.38 & 15.45/11.31 \\
+500 & 1436.56/3712.48 & 10.25/10.95 \\
+1000 & 285.60/6004.51 & 15.91/8.65 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Disk/NIC là trung bình toàn máy, gồm tiến trình khác; NIC có thể không đếm localhost.
+
+Không coi NIC là băng thông API. Container CPU/RAM: chưa đo (Docker daemon không chạy).
+
+\subsubsection*{C. Database performance}
+
+\begin{center}\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+\textbf{Users} & \textbf{Queries} & \textbf{TB (ms)} & \textbf{P95 (ms)} & \textbf{P99 (ms)} & \textbf{Chậm $\geq$100 ms} \\
+\midrule
+100 & 21508 & 0.837 & 4.133 & 7.544 & 0 \\
+300 & 65013 & 0.718 & 3.795 & 6.046 & 0 \\
+500 & 107856 & 0.435 & 2.407 & 3.343 & 0 \\
+1000 & 182232 & 0.483 & 2.804 & 4.374 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+SQLite dùng một kết nối chia sẻ; connection pool và CPU/RAM database riêng: không áp dụng.
+
+Query latency đo thực thi statement và trả kết quả; không gồm prepare, hàng đợi HTTP.
+
+Ngưỡng slow query 100 ms chỉ phục vụ thống kê, chưa phải tiêu chuẩn nghiệm thu.
+
+\paragraph{Giới hạn đo.}
+
+Máy sinh tải dùng chung máy với server; số liệu chịu ảnh hưởng tải nền và instrumentation.
+
+CPU toàn máy trung bình giữa các mức tải nằm trong khoảng 23.09--44.17\%; RAM toàn máy trung bình 84.87--94.39\%. Tải nền thay đổi nên latency không nhất thiết tăng theo số users.
+
+Chưa kiểm thử production, container, trình duyệt hoặc tải đăng nhập đồng thời.
+
+Không dùng kết quả localhost để cam kết năng lực production.
+
+\paragraph{Dữ liệu đối chiếu.}
+
+Báo cáo HTML/CSV, mẫu CPU/RAM mỗi giây và query metrics:
+
+\texttt{performance-test/reports/}\allowbreak\texttt{20261108-200836-full/}.
+
+Test chức năng: \texttt{latex/QA-test/evidence/}.

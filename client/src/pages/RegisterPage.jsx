@@ -39,13 +39,19 @@ export default function RegisterPage() {
   return (
     <main className="min-h-dvh bg-canvas px-6 pt-8 md:grid md:place-items-center md:p-6">
       <div className="flex w-full flex-col gap-6 md:w-[400px] md:rounded-card md:border md:border-line md:bg-surface md:p-8">
-        <h1 className="text-2xl font-medium">Đăng ký</h1>
+        <h1 className="font-display text-4xl font-normal tracking-tight">
+          Đăng ký
+        </h1>
         {error.form ? (
           <p className="text-sm text-danger" role="alert">
             {error.form}
           </p>
         ) : null}
-        <form className="flex flex-col gap-4" noValidate onSubmit={handleSubmit}>
+        <form
+          className="flex flex-col gap-4"
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <FormField
             label="Email"
             name="email"

@@ -1,0 +1,37 @@
+{
+  "users": 1000,
+  "spawn_rate": 10,
+  "warmup_seconds": 30,
+  "measurement_seconds": 300,
+  "host": "http://127.0.0.1:57681",
+  "command": [
+    "L:\\schedule_app\\performance-test\\.venv\\Scripts\\python.exe",
+    "-m",
+    "locust",
+    "-f",
+    "L:\\schedule_app\\performance-test\\locustfile.py",
+    "--headless",
+    "-H",
+    "http://127.0.0.1:57681",
+    "-u",
+    "1000",
+    "-r",
+    "10",
+    "-t",
+    "670",
+    "--stop-timeout",
+    "5",
+    "--only-summary",
+    "--html",
+    "L:\\schedule_app\\performance-test\\reports\\20261108-200836-full\\users-1000\\report.html",
+    "--csv",
+    "L:\\schedule_app\\performance-test\\reports\\20261108-200836-full\\users-1000\\locust",
+    "--csv-full-history"
+  ],
+  "fixtures": {
+    "accounts": 1000,
+    "tasks_per_account": 20,
+    "projects_per_account": 3,
+    "notes_per_account": 5
+  }
+}

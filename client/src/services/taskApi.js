@@ -6,7 +6,7 @@ const SORTS = {
   newest: ["created_at", "desc"],
 };
 
-export function listTasks(status, sortKey) {
+export function listTasks(status, sortKey, { projectId, priority } = {}) {
   const params = new URLSearchParams();
   if (status === "todo" || status === "doing" || status === "done") {
     params.set("status", status);
@@ -14,6 +14,8 @@ export function listTasks(status, sortKey) {
   const [sort, order] = SORTS[sortKey] || SORTS.newest;
   params.set("sort", sort);
   params.set("order", order);
+  if (projectId) params.set("projectId", projectId);
+  if (priority) params.set("priority", priority);
   return request(`/api/tasks?${params.toString()}`);
 }
 
@@ -29,10 +31,6 @@ export function deleteTask(id) {
   return request(`/api/tasks/${id}`, { method: "DELETE" });
 }
 
-export function getDashboard(period) {
-  return request(`/api/dashboard?period=${encodeURIComponent(period)}`);
-}
-
-export function listRecentDone() {
-  return request("/api/tasks?status=done&sort=completed_at&order=desc");
+export function getDashboard() {
+  return request("/api/dashboard");
 }

@@ -1,0 +1,93 @@
+\section{Thiết kế cơ sở dữ liệu}
+
+
+\subsection{Sơ đồ ERD}
+\begin{itemize}
+  \item \#TODO: Vẽ sơ đồ ERD cho toàn bộ hệ thống.
+\end{itemize}
+
+Cơ sở dữ liệu SQLite gồm \textbf{4 bảng}: \texttt{users}, \texttt{projects},
+\texttt{tasks} và \texttt{notes}. Một người dùng có nhiều dự án, công việc và
+ghi chú. Mỗi công việc thuộc một người dùng và gắn tối đa một dự án;
+công việc chưa chia dự án có \texttt{project\_id = NULL}.
+
+Xóa người dùng sẽ xóa dữ liệu phụ thuộc bằng \texttt{ON DELETE CASCADE}.
+Xóa dự án giữ lại công việc và đặt \texttt{project\_id = NULL} bằng
+\texttt{ON DELETE SET NULL}. Ghi chú thuộc trực tiếp người dùng,
+không liên kết với dự án hay công việc.
+
+\subsection{Mô tả các bảng dữ liệu}
+Các trường dưới đây lấy từ \texttt{server/src/db/schema.sql}.
+PK là khóa chính, FK là khóa ngoại; trường cho phép bỏ trống được ghi rõ
+\texttt{NULL}. Các trường còn lại đều bắt buộc hoặc có giá trị mặc định.
+
+\begingroup
+\small
+\begin{longtable}{@{}P{.25\linewidth}P{.12\linewidth}P{.54\linewidth}@{}}
+\toprule
+\textbf{Trường} & \textbf{Kiểu} & \textbf{Ý nghĩa và ràng buộc} \\
+\midrule
+\endhead
+\multicolumn{3}{@{}l}{\textbf{users --- tài khoản (4 trường)}} \\
+\texttt{id} & INTEGER & PK. \\
+\texttt{email} & TEXT & Duy nhất; so sánh không phân biệt hoa/thường. \\
+\texttt{password\_hash} & TEXT & Hash Argon2id; không lưu mật khẩu gốc. \\
+\texttt{created\_at} & TEXT & Thời điểm tạo, mặc định thời gian UTC hiện tại. \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{projects --- dự án (5 trường)}} \\
+\texttt{id} & INTEGER & PK. \\
+\texttt{user\_id} & INTEGER & FK tới \texttt{users.id}; xóa chủ sở hữu thì xóa dự án. \\
+\texttt{name} & TEXT & Tên sau khi bỏ khoảng trắng hai đầu dài 1--80 ký tự. \\
+\texttt{color} & TEXT & Mặc định \texttt{\#5dcfb8}; Service kiểm tra dạng \texttt{\#RRGGBB}. \\
+\texttt{created\_at} & TEXT & Thời điểm tạo, mặc định thời gian UTC hiện tại. \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{tasks --- công việc (12 trường)}} \\
+\texttt{id} & INTEGER & PK. \\
+\texttt{user\_id} & INTEGER & FK tới \texttt{users.id}; xóa chủ sở hữu thì xóa công việc. \\
+\texttt{project\_id} & INTEGER & FK tới \texttt{projects.id}, cho phép \texttt{NULL}; xóa dự án thì bỏ liên kết. \\
+\texttt{title} & TEXT & Tiêu đề sau khi bỏ khoảng trắng hai đầu dài 1--200 ký tự. \\
+\texttt{description} & TEXT & Tối đa 2000 ký tự, mặc định chuỗi rỗng. \\
+\texttt{deadline} & TEXT & Ngày \texttt{YYYY-MM-DD}, cho phép \texttt{NULL}. \\
+\texttt{priority} & TEXT & \texttt{low}, \texttt{high}, cho phép \texttt{NULL}; mặc định không gắn ưu tiên. \\
+\texttt{status} & TEXT & \texttt{todo}, \texttt{doing}, \texttt{done}; mặc định \texttt{todo}. \\
+\texttt{created\_at} & TEXT & Thời điểm tạo, mặc định thời gian UTC hiện tại. \\
+\texttt{completed\_at} & TEXT & Mốc hoàn thành UTC, cho phép \texttt{NULL}; Service tự ghi khi chuyển sang \texttt{done}, xóa mốc khi mở lại. \\
+\texttt{outcome\_note} & TEXT & Ghi nhận kết quả, tối đa 2000 ký tự, cho phép \texttt{NULL}. \\
+\texttt{outcome\_rating} & TEXT & \texttt{good}, \texttt{met}, \texttt{improve}; cho phép \texttt{NULL}. \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{notes --- ghi chú (10 trường)}} \\
+\texttt{id} & INTEGER & PK. \\
+\texttt{user\_id} & INTEGER & FK tới \texttt{users.id}; xóa chủ sở hữu thì xóa ghi chú. \\
+\texttt{title} & TEXT & Tối đa 120 ký tự, mặc định chuỗi rỗng. \\
+\texttt{content} & TEXT & Tối đa 10000 ký tự, mặc định chuỗi rỗng. \\
+\texttt{noted\_on} & TEXT & Ngày \texttt{YYYY-MM-DD}, cho phép \texttt{NULL} ở schema; Service mặc định hôm nay theo UTC+7 khi tạo. \\
+\texttt{color} & INTEGER & Một trong 0, 1, 2, 3; mặc định 0. \\
+\texttt{position\_x} & INTEGER & Tọa độ ngang từ 0 đến 20000, cho phép \texttt{NULL}. \\
+\texttt{position\_y} & INTEGER & Tọa độ dọc từ 0 đến 20000, cho phép \texttt{NULL}. \\
+\texttt{created\_at} & TEXT & Thời điểm tạo, mặc định thời gian UTC hiện tại. \\
+\texttt{updated\_at} & TEXT & Thời điểm cập nhật; ban đầu là thời gian UTC hiện tại, Repository ghi lại khi sửa. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Toàn vẹn dữ liệu và chỉ mục}
+\begin{itemize}
+  \item Bật \texttt{PRAGMA foreign\_keys = ON} khi mở kết nối.
+  Cả 4 bảng dùng PK \texttt{INTEGER}; có 4 FK: 3 khóa người dùng
+  và 1 khóa dự án của công việc.
+  \item Database kiểm tra độ dài nội dung, tập giá trị trạng thái/ưu tiên,
+  màu ghi chú và miền tọa độ. Service kiểm tra thêm ngày lịch thực tế,
+  định dạng email/màu dự án, ghi chú có nội dung và quyền sở hữu dự án.
+  Khóa ngoại không tự bảo đảm công việc và dự án cùng chủ.
+  \item Có 6 chỉ mục khai báo: 4 trên \texttt{tasks}
+  (người dùng--ngày tạo--id; người dùng--trạng thái; người dùng--mốc hoàn thành;
+  người dùng--dự án), 1 trên \texttt{projects} (\texttt{user\_id}),
+  1 trên \texttt{notes} (người dùng--ngày ghi chú--id).
+  Ràng buộc email duy nhất tạo thêm chỉ mục nội bộ của SQLite.
+  \item Schema và migration chạy khi mở database. Dữ liệu cũ được bổ sung
+  các cột công việc/ghi chú còn thiếu trước khi tạo chỉ mục phụ thuộc.
+  Schema/migration chạy trong transaction; lỗi sẽ rollback.
+  Migration ưu tiên dựng lại bảng task, đổi giá trị cũ thành NULL, giữ nguyên các trường và khóa ngoại.
+  Chỉ mục người dùng đơn lẻ đã bỏ vì trùng tiền tố với các chỉ mục ghép.
+  Phiên đăng nhập nằm trong MemoryStore, không có bảng session.
+\end{itemize}

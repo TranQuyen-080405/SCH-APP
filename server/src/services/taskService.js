@@ -1,18 +1,14 @@
 import { HttpError } from "../errors.js";
 import * as taskRepository from "../repositories/taskRepository.js";
+import * as projectRepository from "../repositories/projectRepository.js";
+import { asObject, isCalendarDate, parseId } from "../validation.js";
 
 const STATUSES = new Set(["todo", "doing", "done"]);
-const PRIORITIES = new Set(["low", "medium", "high"]);
+const PRIORITIES = new Set(["low", "high"]);
 const RATINGS = new Set(["good", "met", "improve"]);
-const SORTS = new Set(["created_at", "deadline", "priority", "title", "completed_at"]);
-const PERIOD_DAYS = { "7d": 7, "30d": 30 };
+const SORTS = new Set(["created_at", "deadline"]);
 // Ngày của tổng quan và mốc quá hạn: Asia/Ho_Chi_Minh, không DST, lệch cố định +07.
 const OFFSET_MS = 7 * 60 * 60 * 1000;
-
-function asObject(value) {
-  if (value && typeof value === "object" && !Array.isArray(value)) return value;
-  return {};
-}
 
 function parseTitle(title) {
   if (typeof title !== "string" || title.trim() === "") {
@@ -35,15 +31,6 @@ function parseDescription(description) {
   return description;
 }
 
-function isCalendarDate(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const year = Number(value.slice(0, 4));
-  const month = Number(value.slice(5, 7));
-  const day = Number(value.slice(8, 10));
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
-}
-
 function parseDeadline(deadline) {
   if (deadline === null) return null;
   if (!isCalendarDate(deadline)) {
@@ -53,7 +40,7 @@ function parseDeadline(deadline) {
 }
 
 function parsePriority(priority) {
-  if (!PRIORITIES.has(priority)) {
+  if (priority !== null && !PRIORITIES.has(priority)) {
     throw new HttpError(400, "Độ ưu tiên không hợp lệ");
   }
   return priority;
@@ -105,24 +92,14 @@ function calendarDate(iso) {
   return new Date(new Date(iso).getTime() + OFFSET_MS).toISOString().slice(0, 10);
 }
 
-export function parseId(id) {
-  if (typeof id !== "string" || !/^[1-9]\d*$/.test(id)) {
-    throw new HttpError(400, "Id không hợp lệ");
-  }
-  const value = Number(id);
-  if (!Number.isSafeInteger(value)) {
-    throw new HttpError(400, "Id không hợp lệ");
-  }
-  return value;
-}
-
 export function create(userId, body) {
   const raw = asObject(body);
   const title = parseTitle(raw.title);
   const description = Object.hasOwn(raw, "description") ? parseDescription(raw.description) : "";
   const deadline = Object.hasOwn(raw, "deadline") ? parseDeadline(raw.deadline) : null;
-  const priority = Object.hasOwn(raw, "priority") ? parsePriority(raw.priority) : "medium";
+  const priority = Object.hasOwn(raw, "priority") ? parsePriority(raw.priority) : null;
   const status = Object.hasOwn(raw, "status") ? parseStatus(raw.status) : "todo";
+  const projectId = Object.hasOwn(raw, "projectId") ? parseOwnedProject(userId, raw.projectId) : null;
   const hasNote = Object.hasOwn(raw, "outcomeNote");
   const hasRating = Object.hasOwn(raw, "outcomeRating");
   const outcomeNote = hasNote ? parseOutcomeNote(raw.outcomeNote) : null;
@@ -137,10 +114,18 @@ export function create(userId, body) {
     deadline,
     priority,
     status,
+    projectId,
     completedAt: status === "done" ? new Date().toISOString() : null,
     outcomeNote,
     outcomeRating,
   });
+}
+
+function parseOwnedProject(userId, value) {
+  if (value === null) return null;
+  if (!Number.isSafeInteger(value) || value < 1) throw new HttpError(400, "Dự án không hợp lệ");
+  if (!projectRepository.findOwned(userId, value)) throw new HttpError(404, "Không tìm thấy dự án");
+  return value;
 }
 
 export function list(userId, query) {
@@ -161,7 +146,11 @@ export function list(userId, query) {
     }
     order = raw.order;
   }
-  return taskRepository.list({ userId, status, sort, order });
+  const priority = raw.priority === undefined ? undefined : parsePriority(raw.priority);
+  if (priority === null) throw new HttpError(400, "Độ ưu tiên không hợp lệ");
+  let projectId;
+  if (raw.projectId !== undefined) projectId = raw.projectId === "none" ? null : parseOwnedProject(userId, parseId(raw.projectId));
+  return taskRepository.list({ userId, status, priority, projectId, sort, order });
 }
 
 export function update(userId, idRaw, body) {
@@ -173,6 +162,7 @@ export function update(userId, idRaw, body) {
   if (Object.hasOwn(raw, "deadline")) fields.deadline = parseDeadline(raw.deadline);
   if (Object.hasOwn(raw, "priority")) fields.priority = parsePriority(raw.priority);
   if (Object.hasOwn(raw, "status")) fields.status = parseStatus(raw.status);
+  if (Object.hasOwn(raw, "projectId")) fields.projectId = parseOwnedProject(userId, raw.projectId);
   const hasNote = Object.hasOwn(raw, "outcomeNote");
   const hasRating = Object.hasOwn(raw, "outcomeRating");
   if (hasNote) fields.outcomeNote = parseOutcomeNote(raw.outcomeNote);
@@ -195,11 +185,8 @@ export function update(userId, idRaw, body) {
   return task;
 }
 
-export function dashboard(userId, query, now = new Date()) {
-  const raw = asObject(query);
-  const period = raw.period === undefined ? "7d" : raw.period;
-  const days = PERIOD_DAYS[period];
-  if (!days) throw new HttpError(400, "Khoảng thời gian không hợp lệ");
+export function dashboard(userId, now = new Date()) {
+  const days = 7;
   const today = todayIso(now);
   const startDate = addCalendarDays(today, -(days - 1));
   const dates = [];
@@ -216,25 +203,7 @@ export function dashboard(userId, query, now = new Date()) {
   }
   const summary = taskRepository.counts({ userId, today });
   const trend = dates.map((date) => ({ date, count: counts[date] }));
-  const weekStart = addCalendarDays(today, -6);
-  const weekDates = [];
-  for (let index = 0; index < 7; index += 1) weekDates.push(addCalendarDays(weekStart, index));
-  const weekRows =
-    days === 7
-      ? rows
-      : taskRepository.completedBetween({
-          userId,
-          start: dayStartUtc(weekStart),
-          end: dayStartUtc(addCalendarDays(today, 1)),
-        });
-  const weekCounts = Object.fromEntries(weekDates.map((date) => [date, 0]));
-  for (const row of weekRows) {
-    const day = calendarDate(row.completed_at);
-    if (Object.hasOwn(weekCounts, day)) weekCounts[day] += 1;
-  }
-  const dailyCompletions = weekDates.map((date) => ({ date, count: weekCounts[date] }));
   return {
-    period,
     completed: trend.reduce((sum, day) => sum + day.count, 0),
     doing: summary.doing,
     overdue: summary.overdue,
@@ -244,11 +213,6 @@ export function dashboard(userId, query, now = new Date()) {
       rate: summary.total === 0 ? null : summary.done / summary.total,
     },
     trend,
-    completedLast7Days: dailyCompletions.reduce((sum, day) => sum + day.count, 0),
-    doingCount: summary.doing,
-    overdueCount: summary.overdue,
-    completionRate: summary.total === 0 ? null : Math.round((summary.done / summary.total) * 100),
-    dailyCompletions,
     recentCompleted: taskRepository.recentCompleted({ userId, limit: 5 }),
   };
 }

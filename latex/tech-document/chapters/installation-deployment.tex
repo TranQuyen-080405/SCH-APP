@@ -1,0 +1,64 @@
+\section{Cài đặt và triển khai}
+
+\subsection{Yêu cầu và cấu hình môi trường (.env)}
+Cần Git, Node.js $\geq$ 26.13.0 và npm; Docker có Compose nếu chạy container. SQLite được tạo tự động, không cần cài database server. Dependencies được ghim trong \texttt{package-lock.json}.
+
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Biến môi trường} & \textbf{Chức năng} \\
+\midrule
+\texttt{PORT} & Cổng backend; local/Compose: 3000. Vercel mặc định 80 khi không đặt biến này. \\
+\texttt{SESSION\_SECRET} & Khóa ký cookie phiên; bắt buộc, dùng chuỗi ngẫu nhiên dài, chỉ đặt ở server. \\
+\texttt{CLIENT\_ORIGIN} & Origin frontend cho CORS và kiểm tra request ghi; local: \texttt{http://localhost:5173}. \\
+\texttt{DATABASE\_PATH} & Đường dẫn file SQLite; local: \texttt{./data/app.db}, tính từ thư mục \texttt{server/}. \\
+\texttt{SESSION\_COOKIE\_SECURE} & \texttt{false} cho HTTP local; \texttt{true} cho cookie qua HTTPS. \\
+\texttt{SESSION\_COOKIE\_SAME\_SITE} & Local: \texttt{lax}; frontend/backend khác site qua HTTPS: \texttt{none}. \\
+\texttt{NODE\_ENV} & Đặt \texttt{production} khi triển khai. \\
+\texttt{VITE\_API\_URL} & Origin backend, không thêm \texttt{/api}; để trống khi dùng proxy hoặc chung host. Đổi biến phải build lại frontend. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Hướng dẫn cài đặt và chạy Local}
+Các lệnh dưới dùng PowerShell; thay \texttt{<repository-url>} bằng URL repo.
+\begin{verbatim}
+git clone <repository-url> schedule_app
+cd schedule_app/server
+Copy-Item .env.example .env
+npm ci
+\end{verbatim}
+Điền \texttt{SESSION\_SECRET} trong \texttt{server/.env}, rồi chạy backend:
+\begin{verbatim}
+npm start
+\end{verbatim}
+Mở terminal khác tại thư mục gốc repo, chạy frontend:
+\begin{verbatim}
+cd client
+Copy-Item .env.example .env
+npm ci
+npm run dev
+\end{verbatim}
+Giữ \texttt{VITE\_API\_URL} trống khi chạy local. Mở \url{http://localhost:5173}, đăng ký rồi đăng nhập và tạo thử công việc. Backend nghe cổng 3000; Vite proxy \texttt{/api} tới backend. SQLite tự tạo schema/migrate khi mở kết nối; không có lệnh chạy database riêng. Có thể kiểm tra API bằng \texttt{npm test} tại \texttt{server/}.
+
+\subsection{Hướng dẫn Deploy và Restart}
+\textbf{Docker Compose (một server).} Tại thư mục gốc, đặt biến môi trường rồi build và chạy:
+\begin{verbatim}
+$env:SESSION_SECRET = Read-Host 'SESSION_SECRET'
+$env:CLIENT_ORIGIN = 'http://localhost:3000'
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail=50 app
+\end{verbatim}
+Đổi \texttt{CLIENT\_ORIGIN} thành origin thực khi truy cập từ xa. Dockerfile build React bằng \texttt{npm run build}; Express phục vụ giao diện và API tại cổng 3000. File SQLite nằm trong volume \texttt{app-data}. Restart bằng \texttt{docker compose restart app}; nếu đổi source hoặc cấu hình, chạy lại \texttt{docker compose up -d --build}. Mở website, đăng nhập và tạo thử công việc để kiểm tra.
+
+\textbf{Vercel Container.} Dùng Root Directory \texttt{.} và cấu hình \texttt{vercel.json}/\texttt{Dockerfile} có sẵn. Đặt \texttt{SESSION\_SECRET}, \texttt{CLIENT\_ORIGIN} đúng URL triển khai; HTTPS dùng \texttt{SESSION\_COOKIE\_SECURE=true}. Để trống \texttt{VITE\_API\_URL} khi chung host và không đặt \texttt{PORT} để dùng cổng mặc định 80. Deploy/Redeploy từ dashboard; xem trạng thái và runtime logs, sau đó mở website kiểm tra đăng nhập và CRUD.
+
+Nếu tách frontend/backend: dùng hai file \texttt{.env.production.example} làm mẫu, đặt \texttt{VITE\_API\_URL} phía client và \texttt{CLIENT\_ORIGIN} phía server; khác site cần HTTPS, Secure=true và SameSite=none. Build lại frontend sau khi đổi biến.
+
+\textbf{Lưu trữ:} MemoryStore mất phiên khi restart và không chia sẻ giữa các instance. SQLite cần ổ lưu bền vững; fallback \texttt{/tmp/app.db} trên Vercel chỉ là tạm thời, dữ liệu có thể mất khi instance dừng. Cookie khác site có thể bị trình duyệt chặn; ưu tiên chung host hoặc cùng site.
+
+\subsection{Nâng cấp schema ngày 09/11/2026}
+Dừng backend, sao lưu SQLite rồi khởi động bản mới. Migration tự đổi ưu tiên cũ
+thành \texttt{NULL}, giữ ưu tiên cao/thấp, dữ liệu còn lại và khóa ngoại.
+Database local đã chuyển thành công; bản sao trước chuyển nằm tại
+\texttt{server/data/backups/}. Sau nâng cấp, đăng nhập lại vì MemoryStore mất phiên khi restart.
+Lỗi ràng buộc migration được rollback; không chuyển sang database tạm để bỏ qua lỗi dữ liệu.

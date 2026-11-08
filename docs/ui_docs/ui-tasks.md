@@ -1,3 +1,5 @@
+> Bản thiết kế/lộ trình lịch sử. Hợp đồng hiện tại: `docs/api-contract.md`, `docs/erd.md` và source sau refactor 09/11/2026; không triển khai lại tính năng đã bỏ theo ví dụ cũ.
+
 # Việc dựng UI
 
 Làm sau khi API task đã chạy (AT-15) và client đã gọi được API (AT-16 đến AT-18). Chi tiết nhìn nằm ở các file cùng thư mục. Đánh dấu AT-19 đến AT-24 trong `docs/checklist.md` khi nhóm việc tương ứng xong.

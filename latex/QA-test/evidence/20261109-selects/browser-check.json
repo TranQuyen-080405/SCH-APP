@@ -1,0 +1,32 @@
+[
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 900
+    },
+    "touch": false,
+    "scope_keyboard_outside_tab": "pass",
+    "projects_sort": "pass",
+    "project_scrollbar_styles_wheel_keyboard": "pass",
+    "form_save_payload": "pass",
+    "status_update": "pass",
+    "rating_save": "pass",
+    "popup_bounds_styles": "pass",
+    "page_errors": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "touch": true,
+    "scope_keyboard_outside_tab": "pass",
+    "projects_sort": "pass",
+    "project_scrollbar_styles_wheel_keyboard": "pass",
+    "form_save_payload": "pass",
+    "status_update": "pass",
+    "rating_save": "pass",
+    "popup_bounds_styles": "pass",
+    "page_errors": []
+  }
+]

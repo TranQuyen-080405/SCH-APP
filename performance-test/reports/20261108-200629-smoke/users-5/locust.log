@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\__main__.py", line 3, in <module>
+    main()
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\main.py", line 167, in main
+    ) = merge_locustfiles_content(locustfiles)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\main.py", line 141, in merge_locustfiles_content
+    user_classes, shape_classes = load_locustfile(_locustfile)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\util\load_locustfile.py", line 71, in load_locustfile
+    loader.exec_module(imported)
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "L:\schedule_app\performance-test\locustfile.py", line 17, in <module>
+    class ApplicationUser(HttpUser):
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\user\users.py", line 53, in __new__
+    tasks = get_tasks_from_base_classes(bases, class_dict)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "L:\schedule_app\performance-test\.venv\Lib\site-packages\locust\user\task.py", line 159, in get_tasks_from_base_classes
+    for task in tasks:
+TypeError: 'function' object is not iterable

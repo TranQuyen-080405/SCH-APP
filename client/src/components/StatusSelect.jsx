@@ -1,3 +1,5 @@
+import Select from "./Select.jsx";
+
 const LABEL = {
   todo: "Cần làm",
   doing: "Đang làm",
@@ -12,20 +14,15 @@ const TONE = {
 
 export default function StatusSelect({ value, onChange, disabled, className = "" }) {
   return (
-    <select
+    <Select
       aria-label="Trạng thái"
       value={value}
       disabled={disabled}
-      onChange={(event) => onChange(event.target.value)}
+      onChange={onChange}
+      options={Object.entries(LABEL)}
       className={`h-11 max-w-full rounded-control border border-line px-3 text-sm disabled:opacity-60 ${
         TONE[value] || TONE.todo
       } ${className}`}
-    >
-      {Object.entries(LABEL).map(([id, label]) => (
-        <option key={id} value={id}>
-          {label}
-        </option>
-      ))}
-    </select>
+    />
   );
 }

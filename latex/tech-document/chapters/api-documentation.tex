@@ -1,0 +1,114 @@
+\section{API Documentation}
+
+\subsection{Danh sách API Endpoints}
+Hệ thống có 17 endpoint phục vụ các luồng trên UI.
+
+\begingroup
+\small
+\begin{longtable}{@{}P{.11\linewidth}P{.39\linewidth}P{.41\linewidth}@{}}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Mục đích} \\
+\midrule
+\endhead
+POST & \texttt{/api/auth/register} & Đăng ký; không tự đăng nhập. \\
+POST & \texttt{/api/auth/login} & Đăng nhập, cấp cookie phiên. \\
+POST & \texttt{/api/auth/logout} & Hủy phiên, xóa cookie. \\
+GET & \texttt{/api/auth/me} & Lấy tài khoản đang đăng nhập. \\
+\midrule
+GET & \texttt{/api/tasks} & Danh sách công việc; lọc và sắp xếp. \\
+POST & \texttt{/api/tasks} & Tạo công việc. \\
+PATCH & \texttt{/api/tasks/:id} & Sửa công việc, trạng thái và kết quả. \\
+DELETE & \texttt{/api/tasks/:id} & Xóa công việc. \\
+\midrule
+GET & \texttt{/api/projects} & Danh sách dự án, số việc chưa xong. \\
+POST & \texttt{/api/projects} & Tạo dự án. \\
+PATCH & \texttt{/api/projects/:id} & Sửa tên, màu dự án. \\
+DELETE & \texttt{/api/projects/:id} & Xóa dự án; giữ việc, bỏ liên kết dự án. \\
+\midrule
+GET & \texttt{/api/notes} & Danh sách ghi chú theo ngày giảm dần. \\
+POST & \texttt{/api/notes} & Tạo ghi chú. \\
+PATCH & \texttt{/api/notes/:id} & Sửa ghi chú. \\
+DELETE & \texttt{/api/notes/:id} & Xóa ghi chú. \\
+\midrule
+GET & \texttt{/api/dashboard} & Thống kê tiến độ và việc hoàn thành. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{Request / Response và Authentication}
+\begingroup
+\small
+\begin{longtable}{@{}P{.21\linewidth}P{.70\linewidth}@{}}
+\toprule
+\textbf{Request} & \textbf{Body / parameters} \\
+\midrule
+\endhead
+Quy ước & Body gửi JSON với \texttt{Content-Type: application/json}. \texttt{:id} là số nguyên dương. PATCH chỉ sửa trường được gửi. \\
+Đăng ký & \texttt{email}, \texttt{password}, \texttt{passwordConfirm} bắt buộc; mật khẩu 8--128 ký tự, xác nhận khớp. \\
+Đăng nhập & \texttt{email}, \texttt{password} bắt buộc. \\
+Tạo/sửa công việc & \texttt{title}: chuỗi 1--200 ký tự, bắt buộc khi tạo; \texttt{description}: tối đa 2000 ký tự; \texttt{deadline}: ngày \texttt{YYYY-MM-DD} hoặc \texttt{null}; \texttt{projectId}: số hoặc \texttt{null}, thuộc người dùng. \\
+Trạng thái / kết quả & \texttt{priority}: \texttt{low|high} hoặc \texttt{null}, mặc định \texttt{null} (không gắn ưu tiên); \texttt{status}: \texttt{todo|doing|done}, mặc định \texttt{todo}. \texttt{outcomeNote}: tối đa 2000 ký tự hoặc \texttt{null}; \texttt{outcomeRating}: \texttt{good|met|improve} hoặc \texttt{null}; chỉ gửi kết quả khi trạng thái sau cập nhật là \texttt{done}. \\
+Lọc công việc & Query: \texttt{status}, \texttt{priority}, \texttt{projectId} (id hoặc \texttt{none}); \texttt{sort}: \texttt{created\_at}, \texttt{deadline}; \texttt{order}: \texttt{asc|desc}. Mặc định \texttt{created\_at desc}. \\
+Dự án & \texttt{name}: 1--80 ký tự, bắt buộc khi tạo; \texttt{color}: chuỗi \texttt{\#RRGGBB}, mặc định \texttt{\#5dcfb8}. \\
+Ghi chú & \texttt{title}: tối đa 120 ký tự; \texttt{content}: tối đa 10000 ký tự; cần ít nhất một trường có nội dung. \texttt{notedOn}: ngày \texttt{YYYY-MM-DD}, mặc định hôm nay (UTC+7) khi tạo. \\
+Tổng quan & Không có tham số kỳ; thống kê cố định hôm nay và 6 ngày trước, theo UTC+7. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{@{}P{.21\linewidth}P{.70\linewidth}@{}}
+\toprule
+\textbf{Response} & \textbf{Dữ liệu trả về} \\
+\midrule
+\endhead
+Mã thành công & GET, login, PATCH: \texttt{200}; tạo mới: \texttt{201}; logout, DELETE: \texttt{204}, không có body. \\
+Tài khoản & \texttt{\{user\}} với \texttt{id}, \texttt{email}; không trả mật khẩu hay hash. \\
+Công việc & \texttt{\{tasks: [... ]\}} hoặc \texttt{\{task\}}. Trường: \texttt{id}, \texttt{title}, \texttt{description}, \texttt{deadline}, \texttt{priority}, \texttt{status}, \texttt{projectId}, \texttt{createdAt}, \texttt{completedAt}, \texttt{outcomeNote}, \texttt{outcomeRating}. \\
+Dự án & \texttt{\{projects: [... ]\}} hoặc \texttt{\{project\}}. Trường: \texttt{id}, \texttt{name}, \texttt{color}, \texttt{createdAt}, \texttt{taskCount} (số việc chưa hoàn thành). \\
+Ghi chú & \texttt{\{notes: [... ]\}} hoặc \texttt{\{note\}}. Trường: \texttt{id}, \texttt{title}, \texttt{content}, \texttt{notedOn}, \texttt{color} (0--3), \texttt{position} (tọa độ x/y hoặc null), \texttt{createdAt}, \texttt{updatedAt}. \\
+Tổng quan & \texttt{\{dashboard\}} gồm đúng 6 trường: \texttt{completed}, \texttt{doing}, \texttt{overdue}, \texttt{completion} (\texttt{done,total,rate}), \texttt{trend} (7 ngày), \texttt{recentCompleted} (tối đa 5 việc, chưa có mốc đứng cuối). UI chỉ gọi một request. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{@{}P{.21\linewidth}P{.70\linewidth}@{}}
+\toprule
+\textbf{Ví dụ JSON} & \textbf{Request $\rightarrow$ Response} \\
+\midrule
+\endhead
+Đăng nhập & \texttt{POST /api/auth/login}\newline
+\texttt{\{"email":"user@example.com",}\newline
+\texttt{"password":"12345678"\}}\newline
+\texttt{200: \{"user":\{"id":1,}\newline
+\texttt{"email":"user@example.com"\}\}}; kèm cookie \texttt{sid}. \\
+Tạo công việc & \texttt{POST /api/tasks}\newline
+\texttt{\{"title":"Viet bao cao","priority":"high"\}}\newline
+\texttt{201: \{"task":\{"id":15,"title":"Viet bao cao",}\newline
+\texttt{"description":"","deadline":null,"priority":"high",}\newline
+\texttt{"status":"todo","projectId":null,}\newline
+\texttt{"createdAt":"2026-11-08T03:00:00.000Z",}\newline
+\texttt{"completedAt":null,"outcomeNote":null,}\newline
+\texttt{"outcomeRating":null\}\}} \\
+Danh sách / lỗi & \texttt{GET /api/tasks?status=doing}\newline
+\texttt{200: \{"tasks":[]\}} (khi chưa có việc đang làm).\newline
+\texttt{GET /api/tasks} khi chưa đăng nhập:\newline
+\texttt{401: \{"error":"Chưa đăng nhập"\}}. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{@{}P{.21\linewidth}P{.70\linewidth}@{}}
+\toprule
+\textbf{Xác thực / lỗi} & \textbf{Cơ chế / ý nghĩa} \\
+\midrule
+\endhead
+Session & \texttt{express-session}, MemoryStore; phiên giữ \texttt{userId}. Cookie \texttt{sid}: HttpOnly, hạn 7 ngày; mặc định SameSite=Lax, Secure=false. Restart mất phiên. Mật khẩu lưu bằng Argon2id. \\
+Quyền truy cập & \texttt{/api/auth/me}, tasks, projects, notes, dashboard cần phiên; tài nguyên được giới hạn theo người dùng. Đăng ký, đăng nhập, đăng xuất không yêu cầu phiên có sẵn. \\
+Origin / CORS & POST, PATCH, DELETE: Origin có mặt phải khớp \texttt{CLIENT\_ORIGIN}; vắng thì cho qua. CORS chỉ cho origin cấu hình, kèm credentials; frontend gửi \texttt{credentials: "include"}. Khác site qua HTTPS dùng Secure=true, SameSite=none. \\
+Định dạng lỗi & \texttt{\{"error":"Thông báo lỗi"\}}. \\
+400 & Body JSON, trường dữ liệu, id hoặc query không hợp lệ. \\
+401 & Chưa đăng nhập hoặc email/mật khẩu sai. \\
+403 & Origin của request ghi không hợp lệ. \\
+404 & Công việc, dự án, ghi chú không tồn tại hoặc thuộc tài khoản khác. \\
+409 & Email đã được đăng ký. \\
+500 & Lỗi máy chủ; thiếu \texttt{SESSION\_SECRET} khiến mọi request trả 500. \\
+\bottomrule
+\end{longtable}
+\endgroup

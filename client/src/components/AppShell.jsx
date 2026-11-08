@@ -1,28 +1,57 @@
-import { useState } from "react";
-import { CalendarDays, ChartNoAxesColumn, ListTodo, LogOut, NotebookPen } from "lucide-react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  CalendarDays,
+  ChartNoAxesColumn,
+  ChevronDown,
+  ListTodo,
+  LogOut,
+  NotebookPen,
+} from "lucide-react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { logout } from "../services/authApi.js";
+import { ProjectProvider } from "./ProjectContext.jsx";
+import TaskSidebar from "./TaskSidebar.jsx";
+import { NotesProvider } from "./NotesContext.jsx";
 
 const ITEMS = [
   ["/tasks", "Công việc", ListTodo],
-  ["/calendar", "Lịch", CalendarDays],
+  ["/calendar", "Lịch biểu", CalendarDays],
   ["/notes", "Ghi chú", NotebookPen],
   ["/overview", "Tổng quan", ChartNoAxesColumn],
 ];
 
-function navClass(active, iconOnly) {
-  return `flex items-center rounded-control text-sm font-medium ${
-    iconOnly ? "h-11 w-11 justify-center" : "h-11 gap-3 px-3"
-  } ${active ? "bg-doing-bg text-primary" : "text-muted hover:bg-todo-bg"}`;
-}
-
-export default function AppShell({ user }) {
+function WorkspaceShell({ user }) {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const title = ITEMS.find(([path]) => path === pathname)?.[1] || "SCH-APP";
+  const { pathname, search } = useLocation();
   const email = user?.email || "";
+  const initial = email.charAt(0).toUpperCase() || "U";
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname, search]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    function close(event) {
+      if (
+        event.type === "keydown"
+          ? event.key === "Escape"
+          : !menuRef.current?.contains(event.target)
+      )
+        setOpen(false);
+    }
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
 
   async function handleLogout() {
     try {
@@ -37,76 +66,96 @@ export default function AppShell({ user }) {
   }
 
   return (
-    <div className="min-h-dvh bg-canvas md:grid md:grid-cols-[4rem_minmax(0,1fr)] lg:grid-cols-[14rem_minmax(0,1fr)]">
+    <div className="focus-workspace min-h-dvh bg-surface md:grid md:grid-cols-[4.5rem_minmax(0,1fr)] lg:grid-cols-[17rem_minmax(0,1fr)]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface md:flex">
-        <div className="flex h-14 items-center px-3 lg:px-4">
-          <p className="hidden text-base font-semibold text-ink lg:block">SCH-APP</p>
-        </div>
-        <nav className="flex flex-1 flex-col gap-1 px-2 lg:px-3" aria-label="Mục chính">
-          {ITEMS.map(([path, label, Icon]) => (
-            <NavLink key={path} to={path} end title={label} aria-label={label} className={({ isActive }) => navClass(isActive, true) + " lg:w-auto lg:justify-start lg:gap-3 lg:px-3"}>
-              <Icon size={20} aria-hidden="true" />
-              <span className="hidden lg:inline">{label}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="border-t border-line p-2 lg:p-3">
-          <p className="hidden truncate px-3 pb-1 text-[13px] text-muted lg:block" title={email}>
-            {email}
-          </p>
-          <button
-            type="button"
-            className="flex h-11 w-11 items-center justify-center rounded-control text-ink lg:w-full lg:justify-start lg:gap-3 lg:px-3"
-            title="Đăng xuất"
-            aria-label="Đăng xuất"
-            onClick={handleLogout}
-          >
-            <LogOut size={18} aria-hidden="true" />
-            <span className="hidden text-sm font-medium lg:inline">Đăng xuất</span>
-          </button>
-        </div>
+        <Link
+          to="/tasks"
+          className="flex h-20 shrink-0 items-center justify-center px-1 font-display text-[11px] font-semibold tracking-tight text-primary lg:px-4 lg:text-[26px]"
+          aria-label="SCHE-APP — Công việc"
+          title="Công việc"
+        >
+          SCHE-APP
+        </Link>
+
+        <TaskSidebar />
       </aside>
 
-      <div className="flex min-w-0 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-surface px-4 md:hidden">
-          <h1 className="text-[22px] font-semibold text-ink">{title}</h1>
-          <div className="relative">
-            <button
-              type="button"
-              className="flex h-11 max-w-36 items-center justify-end"
-              aria-haspopup="menu"
-              aria-expanded={open}
-              aria-label="Tài khoản"
-              title={email}
-              onClick={() => setOpen((value) => !value)}
+      <div className="flex min-w-0 flex-col bg-canvas pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+        <header className="relative z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-4 md:px-8">
+          <div className="flex min-w-0 items-center gap-2 text-muted">
+            <Link
+              to="/tasks"
+              aria-label="SCHE-APP — Công việc"
+              className="font-display text-lg font-semibold tracking-tight text-primary md:hidden"
             >
-              <span className="truncate text-sm">{email}</span>
-            </button>
-            {open ? (
-              <div role="menu" className="absolute right-0 z-30 mt-1 min-w-40 rounded-card border border-line bg-surface p-1 shadow-overlay">
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex h-11 w-full items-center rounded-control px-3 text-left"
-                  onClick={() => {
-                    setOpen(false);
-                    handleLogout();
-                  }}
+              SCHE-APP
+            </Link>
+          </div>
+          <div className="flex shrink-0 items-center gap-4">
+            <Link
+              to="/calendar"
+              aria-label="Mở lịch biểu"
+              title={new Intl.DateTimeFormat("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              }).format(new Date())}
+              className="hidden size-11 items-center justify-center rounded-control text-muted hover:bg-stone sm:flex"
+            >
+              <CalendarDays
+                size={18}
+                strokeWidth={1.5}
+                className="text-primary"
+                aria-hidden="true"
+              />
+            </Link>
+            <div ref={menuRef} className="relative">
+              <button
+                type="button"
+                className="flex min-h-11 items-center gap-2 rounded-control px-1"
+                aria-label="Tài khoản"
+                aria-haspopup="menu"
+                aria-expanded={open}
+                title={email}
+                onClick={() => setOpen((value) => !value)}
+              >
+                <span className="grid size-9 place-items-center rounded-full border border-line bg-surface text-primary">
+                  {initial}
+                </span>
+                <ChevronDown
+                  size={15}
+                  className="text-primary"
+                  aria-hidden="true"
+                />
+              </button>
+              {open && (
+                <div
+                  role="menu"
+                  className="dropdown-panel absolute right-0 z-30 mt-1.5 w-60"
                 >
-                  Đăng xuất
-                </button>
-              </div>
-            ) : null}
+                  <p className="truncate border-b border-line px-3 py-3 text-sm text-muted">
+                    {email}
+                  </p>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex h-11 w-full items-center gap-2 rounded-control px-3 text-left hover:bg-doing-bg hover:text-primary"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={17} aria-hidden="true" />
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
-
-        {error ? (
-          <p role="alert" className="mx-auto w-full max-w-[1120px] px-4 pt-4 text-sm text-danger md:px-8">
+        {error && (
+          <p role="alert" className="px-4 pt-4 text-danger md:px-8">
             {error}
           </p>
-        ) : null}
-
-        <main className="mx-auto w-full max-w-[1120px] flex-1 px-4 py-4 md:px-8 md:py-8">
+        )}
+        <main className="w-full min-w-0 flex-1 px-4 py-6 md:px-7 md:pt-8 md:pb-8 xl:px-9">
           <Outlet />
         </main>
       </div>
@@ -121,18 +170,27 @@ export default function AppShell({ user }) {
               key={path}
               to={path}
               end
+              aria-label={label}
+              title={label}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 text-[13px] font-medium ${
-                  isActive ? "text-primary" : "text-muted"
-                }`
+                `flex items-center justify-center ${isActive ? "text-primary" : "text-muted"}`
               }
             >
-              <Icon size={20} aria-hidden="true" />
-              {label}
+              <Icon size={21} strokeWidth={1.6} aria-hidden="true" />
             </NavLink>
           ))}
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function AppShell({ user }) {
+  return (
+    <ProjectProvider>
+      <NotesProvider key={user?.id}>
+        <WorkspaceShell user={user} />
+      </NotesProvider>
+    </ProjectProvider>
   );
 }

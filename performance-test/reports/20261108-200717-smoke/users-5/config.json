@@ -1,0 +1,37 @@
+{
+  "users": 5,
+  "spawn_rate": 5.0,
+  "warmup_seconds": 2,
+  "measurement_seconds": 8,
+  "host": "http://127.0.0.1:64354",
+  "command": [
+    "L:\\schedule_app\\performance-test\\.venv\\Scripts\\python.exe",
+    "-m",
+    "locust",
+    "-f",
+    "L:\\schedule_app\\performance-test\\locustfile.py",
+    "--headless",
+    "-H",
+    "http://127.0.0.1:64354",
+    "-u",
+    "5",
+    "-r",
+    "5.0",
+    "-t",
+    "251.0",
+    "--stop-timeout",
+    "5",
+    "--only-summary",
+    "--html",
+    "L:\\schedule_app\\performance-test\\reports\\20261108-200717-smoke\\users-5\\report.html",
+    "--csv",
+    "L:\\schedule_app\\performance-test\\reports\\20261108-200717-smoke\\users-5\\locust",
+    "--csv-full-history"
+  ],
+  "fixtures": {
+    "accounts": 5,
+    "tasks_per_account": 20,
+    "projects_per_account": 3,
+    "notes_per_account": 5
+  }
+}

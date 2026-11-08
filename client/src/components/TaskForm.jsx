@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import FormField from "./FormField.jsx";
+import Select from "./Select.jsx";
 import { OutcomeFields } from "./ReflectionForm.jsx";
 
 const PRIORITIES = [
+  ["", "Không gắn ưu tiên"],
   ["low", "Thấp"],
-  ["medium", "Trung bình"],
   ["high", "Cao"],
 ];
 
@@ -20,8 +21,9 @@ function toForm(initial) {
     title: initial?.title ?? "",
     description: initial?.description ?? "",
     deadline: initial?.deadline ?? "",
-    priority: initial?.priority ?? "medium",
+    priority: initial?.priority ?? "",
     status: initial?.status ?? "todo",
+    projectId: initial?.projectId ?? "",
     outcomeNote: initial?.outcomeNote ?? "",
     outcomeRating: initial?.outcomeRating ?? "",
   };
@@ -31,8 +33,9 @@ function payloadFrom(mode, values, includeOutcome) {
   const body = {
     title: values.title.trim(),
     description: values.description,
-    priority: values.priority,
+    priority: values.priority || null,
     status: values.status,
+    projectId: values.projectId === "" ? null : Number(values.projectId),
   };
   if (values.deadline) body.deadline = values.deadline;
   else if (mode === "edit") body.deadline = null;
@@ -45,7 +48,15 @@ function payloadFrom(mode, values, includeOutcome) {
 
 const emptyError = { form: "", fields: {} };
 
-export default function TaskForm({ mode, initial, submitting, error, onSubmit, onClose }) {
+export default function TaskForm({
+  mode,
+  initial,
+  submitting,
+  error,
+  onSubmit,
+  onClose,
+  projects = [],
+}) {
   const [values, setValues] = useState(() => toForm(initial));
   const [clientError, setClientError] = useState(null);
   const onCloseRef = useRef(onClose);
@@ -59,7 +70,8 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
 
   useEffect(() => {
     function onKey(event) {
-      if (event.key === "Escape" && !submittingRef.current) onCloseRef.current();
+      if (event.key === "Escape" && !submittingRef.current)
+        onCloseRef.current();
     }
     document.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -78,7 +90,10 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
     event.preventDefault();
     if (submitting) return;
     if (!values.title.trim()) {
-      setClientError({ form: "", fields: { title: "Tiêu đề không được để trống" } });
+      setClientError({
+        form: "",
+        fields: { title: "Tiêu đề không được để trống" },
+      });
       return;
     }
     setClientError(null);
@@ -111,7 +126,6 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
               <h2 id="task-form-title" className="text-base font-semibold">
                 {title}
               </h2>
-              <p className="text-[13px] text-muted">Tên việc, hạn, mức ưu tiên và trạng thái.</p>
             </div>
             <button
               type="button"
@@ -124,7 +138,12 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
             </button>
           </div>
 
-          <form className="flex flex-1 flex-col" autoComplete="off" noValidate onSubmit={handleSubmit}>
+          <form
+            className="flex flex-1 flex-col"
+            autoComplete="off"
+            noValidate
+            onSubmit={handleSubmit}
+          >
             <div className="flex flex-col gap-3 px-4 py-3 md:px-6">
               {shown.form ? (
                 <p role="alert" className="text-sm text-danger">
@@ -141,12 +160,36 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
                 error={fields.title}
                 autoFocus
               />
-              <FormField label="Ghi chú việc, không bắt buộc" name="description" error={fields.description}>
+              <FormField
+                label="Ghi chú việc, không bắt buộc"
+                name="description"
+                error={fields.description}
+              >
                 <textarea
                   value={values.description}
                   placeholder="Chi tiết ngắn, nếu cần"
-                  onChange={(event) => setField("description", event.target.value)}
+                  onChange={(event) =>
+                    setField("description", event.target.value)
+                  }
                   className="min-h-16 py-2"
+                />
+              </FormField>
+              <FormField
+                label="Dự án"
+                name="projectId"
+                error={fields.projectId}
+              >
+                <Select
+                  value={values.projectId}
+                  onChange={(value) => setField("projectId", value)}
+                  options={[
+                    ["", "Chưa chia dự án"],
+                    ...(values.projectId !== "" && !projects.some((project) => String(project.id) === String(values.projectId))
+                      ? [[values.projectId, "Dự án hiện tại"]] : []),
+                    ...projects.map((project) => [project.id, project.name]),
+                  ]}
+                  disabled={submitting}
+                  className="h-11"
                 />
               </FormField>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -158,34 +201,36 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
                   onChange={(event) => setField("deadline", event.target.value)}
                   error={fields.deadline}
                 />
-                <FormField label="Ưu tiên" name="priority" error={fields.priority}>
-                  <select
-                    value={values.priority}
-                    onChange={(event) => setField("priority", event.target.value)}
-                    className="h-11"
-                  >
-                    {PRIORITIES.map(([id, label]) => (
-                      <option key={id} value={id}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                <FormField
+                  label="Ưu tiên"
+                  name="priority"
+                  error={fields.priority}
+                >
+                  <Select
+                  value={values.priority}
+                  onChange={(value) => setField("priority", value)}
+                  options={PRIORITIES}
+                  disabled={submitting}
+                  className="h-11"
+                />
                 </FormField>
-                <FormField label="Trạng thái" name="status" error={fields.status}>
-                  <select
-                    value={values.status}
-                    onChange={(event) => setField("status", event.target.value)}
-                    className="h-11"
-                  >
-                    {STATUSES.map(([id, label]) => (
-                      <option key={id} value={id}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                <FormField
+                  label="Trạng thái"
+                  name="status"
+                  error={fields.status}
+                >
+                  <Select
+                  value={values.status}
+                  onChange={(value) => setField("status", value)}
+                  options={STATUSES}
+                  disabled={submitting}
+                  className="h-11"
+                />
                 </FormField>
               </div>
-              <p className="-mt-1 text-[13px] text-muted">Hạn để trống nếu chưa chốt ngày. Chỉ lưu ngày, không lưu giờ.</p>
+              <p className="-mt-1 text-[13px] text-muted">
+                Không bắt buộc chọn hạn.
+              </p>
               {showOutcome && values.status === "done" ? (
                 <OutcomeFields
                   note={values.outcomeNote}
@@ -211,7 +256,11 @@ export default function TaskForm({ mode, initial, submitting, error, onSubmit, o
                 className="inline-flex h-11 items-center justify-center rounded-control bg-primary px-4 text-white hover:bg-primary-hover disabled:opacity-60"
                 disabled={submitting}
               >
-                {submitting ? "Đang lưu..." : mode === "create" ? "Thêm công việc" : "Lưu thay đổi"}
+                {submitting
+                  ? "Đang lưu..."
+                  : mode === "create"
+                    ? "Thêm công việc"
+                    : "Lưu thay đổi"}
               </button>
             </div>
           </form>

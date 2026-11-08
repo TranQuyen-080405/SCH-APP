@@ -1,0 +1,10 @@
+{
+  "client\\src": {
+    "source_files": 38,
+    "unreachable_files": []
+  },
+  "server\\src": {
+    "source_files": 28,
+    "unreachable_files": []
+  }
+}

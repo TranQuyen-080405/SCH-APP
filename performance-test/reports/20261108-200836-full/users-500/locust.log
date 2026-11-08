@@ -1,0 +1,36 @@
+[2026-11-08 20:20:23,549] TranQuyen/INFO/locust.main: Starting Locust 2.47.0
+[2026-11-08 20:20:23,551] TranQuyen/INFO/locust.main: Run time limit set to 620 seconds
+[2026-11-08 20:20:23,552] TranQuyen/INFO/locust.runners: Ramping to 500 users at a rate of 10.00 per second
+[2026-11-08 20:21:12,802] TranQuyen/INFO/locust.runners: All users spawned: {"ApplicationUser": 500} (500 total users)
+[2026-11-08 20:26:43,180] TranQuyen/INFO/locust.main: Shutting down (exit code 0)
+Type     Name                                                                          # reqs      # fails |    Avg     Min     Max    Med |   req/s  failures/s
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+DELETE   DELETE /api/tasks/:id                                                           3756     0(0.00%) |      7       2      42      6 |   12.51        0.00
+GET      GET /api/auth/me                                                                3681     0(0.00%) |      6       1     125      6 |   12.26        0.00
+GET      GET /api/dashboard [7d]                                                        11096     0(0.00%) |      7       1      94      6 |   36.97        0.00
+GET      GET /api/notes                                                                  7397     0(0.00%) |      6       1      91      6 |   24.65        0.00
+GET      GET /api/projects                                                               7327     0(0.00%) |      6       1     125      6 |   24.41        0.00
+GET      GET /api/tasks                                                                     0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+GET      GET /api/tasks [filter]                                                        11270     0(0.00%) |      6       1      55      6 |   37.55        0.00
+GET      GET /api/tasks [sort]                                                          22473     0(0.00%) |      6       1     125      6 |   74.88        0.00
+PATCH    PATCH /api/tasks/:id                                                            7464     0(0.00%) |      8       2     125      8 |   24.87        0.00
+POST     POST /api/auth/login                                                               0     0(0.00%) |      0       0       0      0 |    0.00        0.00
+POST     POST /api/tasks                                                                 3756     0(0.00%) |      8       2      54      8 |   12.51        0.00
+--------|----------------------------------------------------------------------------|-------|-------------|-------|-------|-------|-------|--------|-----------
+         Aggregated                                                                     78220     0(0.00%) |      7       1     125      6 |  260.62        0.00
+
+Response time percentiles (approximated)
+Type     Name                                                                                  50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+DELETE   DELETE /api/tasks/:id                                                                   6      8      9     10     12     15     19     21     40     42     42   3756
+GET      GET /api/auth/me                                                                        6      7      9      9     12     15     18     21     49    130    130   3681
+GET      GET /api/dashboard [7d]                                                                 6      8      9     10     12     15     18     21     43     78     95  11096
+GET      GET /api/notes                                                                          6      7      8      9     12     14     18     21     41     92     92   7397
+GET      GET /api/projects                                                                       6      7      9      9     12     14     18     21     48    130    130   7327
+GET      GET /api/tasks [filter]                                                                 6      7      9      9     12     14     17     20     45     51     55  11270
+GET      GET /api/tasks [sort]                                                                   6      8      9      9     12     15     18     21     44    130    130  22473
+PATCH    PATCH /api/tasks/:id                                                                    8     10     11     12     15     17     20     23     45    130    130   7464
+POST     POST /api/tasks                                                                         8     10     11     12     14     17     20     23     41     54     54   3756
+--------|--------------------------------------------------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
+         Aggregated                                                                              6      8      9     10     12     15     18     21     44     95    130  78220
+

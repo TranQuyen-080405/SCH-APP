@@ -18,7 +18,12 @@ export async function me(req, res) {
 
 export function logout(req, res, next) {
   const done = () => {
-    res.clearCookie("sid", { path: "/", httpOnly: true, sameSite: "lax", secure: false });
+    res.clearCookie("sid", {
+      path: "/",
+      httpOnly: true,
+      sameSite: process.env.SESSION_COOKIE_SAME_SITE || "lax",
+      secure: process.env.SESSION_COOKIE_SECURE === "true",
+    });
     res.status(204).end();
   };
   if (!req.session) {

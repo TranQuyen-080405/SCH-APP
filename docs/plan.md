@@ -1,3 +1,5 @@
+> Bản thiết kế/lộ trình lịch sử. Hợp đồng hiện tại: `docs/api-contract.md`, `docs/erd.md` và source sau refactor 09/11/2026; không triển khai lại tính năng đã bỏ theo ví dụ cũ.
+
 
 # Lộ trình xây dựng Mini Project: Personal Task Management Website
 

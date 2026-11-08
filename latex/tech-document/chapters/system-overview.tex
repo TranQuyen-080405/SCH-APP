@@ -1,0 +1,30 @@
+\section{Tổng quan hệ thống}
+
+\subsection{Giới thiệu và chức năng chính}
+Personal Task Management giúp người dùng tổ chức công việc cá nhân, theo dõi thời hạn và tiến độ trên website. Các chức năng chính:
+\begin{itemize}
+  \item Đăng ký, đăng nhập và đăng xuất; dữ liệu tách riêng theo tài khoản.
+  \item Thêm, sửa, xóa dự án và công việc; đặt hạn, gắn ưu tiên cao/thấp hoặc không gắn, đặt trạng thái; tìm kiếm, lọc và sắp xếp công việc.
+  \item Xem công việc theo lịch tháng; tạo và quản lý ghi chú theo ngày.
+  \item Xem thống kê hoàn thành trong 7 ngày; ghi kết quả và tự đánh giá công việc đã hoàn thành.
+\end{itemize}
+
+\subsection{Công nghệ sử dụng (Technology Stack)}
+\begin{tabularx}{\linewidth}{@{}lXl@{}}
+\toprule
+\textbf{Thành phần} & \textbf{Công nghệ / thư viện} & \textbf{Phiên bản} \\
+\midrule
+Runtime & Node.js & $\geq$ 26.13.0 \\
+Frontend & React, React DOM & 19.3.1 \\
+Điều hướng & React Router & 8.5.1 \\
+Giao diện & Tailwind CSS, \texttt{@tailwindcss/vite} & 4.3.4 \\
+Biểu tượng & Lucide React & 1.67.0 \\
+Build / dev & Vite; \texttt{@vitejs/plugin-react} & 8.3.5; 6.2.1 \\
+Backend & Express & 5.3.0 \\
+Phiên đăng nhập & express-session (MemoryStore) & 1.19.0 \\
+Mật khẩu & \texttt{@node-rs/argon2} (Argon2id) & 2.2.2 \\
+Database & SQLite, truy cập qua better-sqlite3 & driver 13.0.3 \\
+Kiểm thử & \texttt{node:test}; Supertest & theo Node.js; 7.3.1 \\
+Triển khai & Docker Compose; Vercel Container & theo cấu hình repo \\
+\bottomrule
+\end{tabularx}

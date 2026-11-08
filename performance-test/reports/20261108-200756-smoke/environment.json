@@ -1,0 +1,19 @@
+{
+  "local_date": "2026-11-08T20:07:56.835645+07:00",
+  "timezone": "Asia/Saigon",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+  "logical_cpus": 12,
+  "physical_cpus": 8,
+  "ram_gib": 15.711418151855469,
+  "python": "3.11.9",
+  "node": "v26.13.0",
+  "locust": "2.47.0",
+  "psutil": "7.2.2",
+  "git_head": "fb4c510a7e5b0e68f43a070fcefaaca996345166",
+  "working_tree_dirty": true,
+  "scope": "Localhost; generator and backend share host; one Node process, embedded SQLite; no container",
+  "sampling_seconds": 1,
+  "io_scope": "Host-wide disk and NIC counters; other processes included; NIC counters may exclude localhost",
+  "query_scope": "Statement get/all/run execution incl. binding and result materialization; excludes prepare and HTTP queue time"
+}

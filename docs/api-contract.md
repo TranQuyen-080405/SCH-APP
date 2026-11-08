@@ -36,7 +36,7 @@ Ba dạng thành công có body:
 ```
 
 ```json
-{ "task": { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": "medium", "status": "todo", "createdAt": "2026-11-04T04:00:00.000Z" } }
+{ "task": { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": null, "status": "todo", "createdAt": "2026-11-04T04:00:00.000Z" } }
 ```
 
 ```json
@@ -63,13 +63,12 @@ Không trả `password`, `passwordHash`, `password_hash`. Object task không có
 | `description` | Dài hơn 2000 ký tự | `Mô tả không được dài quá 2000 ký tự` |
 | `deadline` | Có mặt, khác `null`, và không phải ngày lịch `YYYY-MM-DD` | `Deadline không phải ngày hợp lệ` |
 | `status` | Có mặt trong body, hoặc query `status` không thuộc `todo`, `doing`, `done` | `Trạng thái không hợp lệ` |
-| `priority` | Có mặt nhưng không thuộc `low`, `medium`, `high` | `Độ ưu tiên không hợp lệ` |
-| `sort` | Có mặt nhưng không thuộc `created_at`, `deadline`, `priority`, `title`, `completed_at` | `Cột sắp xếp không hợp lệ` |
+| `priority` | Body khác `null`, `low`, `high`; query khác `low`, `high` | `Độ ưu tiên không hợp lệ` |
+| `sort` | Có mặt nhưng không thuộc `created_at`, `deadline` | `Cột sắp xếp không hợp lệ` |
 | `outcomeNote` | Có mặt nhưng không phải string | `Ghi chú kết quả không hợp lệ` |
 | `outcomeNote` | Dài hơn 2000 ký tự | `Ghi chú kết quả không được dài quá 2000 ký tự` |
 | `outcomeRating` | Có mặt, khác `null`, và không thuộc `good`, `met`, `improve` | `Tự đánh giá không hợp lệ` |
 | `outcomeNote`, `outcomeRating` | Gửi lên khi việc sau cập nhật không phải `done` | `Chỉ ghi nhận kết quả khi công việc đã hoàn thành` |
-| `period` | Có mặt nhưng không phải `7d` hoặc `30d` | `Khoảng thời gian không hợp lệ` |
 | `order` | Có mặt nhưng không thuộc `asc`, `desc` | `Chiều sắp xếp không hợp lệ` |
 | `:id` | Không phải số nguyên dương | `Id không hợp lệ` |
 
@@ -139,13 +138,29 @@ Không có trường khác.
 
 ## Task trên response
 
+Bổ sung theo yêu cầu chia dự án: task có `projectId` là số nguyên dương hoặc `null`. POST/PATCH nhận `projectId` dạng number/null; chỉ gán được dự án thuộc user trong session. Thiếu khi tạo là `null`, thiếu khi sửa giữ nguyên. Giá trị sai dạng trả 400 `Dự án không hợp lệ`; id không thuộc user hoặc không tồn tại trả 404 `Không tìm thấy dự án`.
+
+GET `/api/tasks` nhận thêm `projectId=<id>` để lọc dự án, `projectId=none` để lấy việc chưa chia dự án, và `priority=low|high`. Các bộ lọc kết hợp với status và sort hiện có; id dự án phải thuộc người dùng.
+
+## Dự án — bổ sung theo yêu cầu người dùng
+
+- `GET /api/projects`: 200 `{ projects }`, chỉ dự án của user. Mỗi dự án có `id`, `name`, `color`, `createdAt`, `taskCount` (số việc chưa hoàn thành).
+- `POST /api/projects`: body `{ name, color? }`, 201 `{ project }`. Tên trim dài 1–80 ký tự, màu `#RRGGBB`, mặc định `#5dcfb8`.
+- `PATCH /api/projects/:id`: body có thể chứa `name`, `color`; 200 `{ project }`.
+- `DELETE /api/projects/:id`: 204. Giữ toàn bộ công việc, chuyển `projectId` của chúng về `null`.
+- Tất cả endpoint cần session; ghi kiểm tra Origin như task. Id sai dạng trả 400. Dự án không tồn tại hoặc thuộc người khác trả cùng 404 `Không tìm thấy dự án`.
+- Lỗi trường: 400 `Tên dự án phải từ 1 đến 80 ký tự`, `Màu dự án không hợp lệ`.
+
+## Các trường task
+
 | Trường | Kiểu | Ý nghĩa |
 | --- | --- | --- |
 | `id` | number | Khóa chính, số nguyên |
 | `title` | string | Đã trim, 1–200 ký tự |
+| `projectId` | number hoặc `null` | Dự án của user; `null` là chưa chia dự án |
 | `description` | string | Tối đa 2000 ký tự. Trống là `""`, không phải `null` |
 | `deadline` | string hoặc `null` | `YYYY-MM-DD`, hoặc `null` nếu không hạn |
-| `priority` | string | `low`, `medium`, `high` |
+| `priority` | string hoặc null | `low`, `high`, hoặc `null` (không gắn ưu tiên) |
 | `status` | string | `todo`, `doing`, `done` |
 | `createdAt` | string | Thời điểm tạo, UTC ISO-8601. Ví dụ `2026-11-04T04:00:00.000Z` |
 | `completedAt` | string hoặc `null` | UTC ISO-8601 lúc vào `done`. `null` nếu chưa hoàn thành hoặc đã mở lại. Server tự ghi, client không đặt được |
@@ -157,9 +172,10 @@ Không có trường khác.
 | Trường | POST | PATCH | Ràng buộc khi có mặt |
 | --- | --- | --- | --- |
 | `title` | bắt buộc | tùy chọn | string, trim xong dài 1–200. Toàn dấu cách là 400 |
+| `projectId` | tùy chọn | tùy chọn | number nguyên dương thuộc user hoặc `null`. Thiếu lúc tạo là `null`, thiếu khi sửa giữ nguyên |
 | `description` | tùy chọn | tùy chọn | string, tối đa 2000. Thiếu lúc tạo thì `""` |
 | `deadline` | tùy chọn | tùy chọn | `YYYY-MM-DD` là ngày lịch có thật, hoặc `null`. `2026-02-31` là 400. Thiếu lúc tạo thì `null`. `null` lúc sửa thì xóa hạn |
-| `priority` | tùy chọn | tùy chọn | `low`, `medium`, `high`. Thiếu lúc tạo thì `medium` |
+| `priority` | tùy chọn | tùy chọn | `low`, `high`, hoặc `null`. Thiếu lúc tạo thì `null`; PATCH thiếu trường giữ nguyên |
 | `status` | tùy chọn | tùy chọn | `todo`, `doing`, `done`. Thiếu lúc tạo thì `todo` |
 | `outcomeNote` | tùy chọn | tùy chọn | string tối đa 2000, hoặc `null`. Trim xong rỗng thì lưu `null`. Chỉ khi status sau ghi là `done`. Thiếu thì `null` lúc tạo, giữ nguyên lúc sửa |
 | `outcomeRating` | tùy chọn | tùy chọn | `good`, `met`, `improve`, hoặc `null`. Chỉ khi status sau ghi là `done` |
@@ -296,7 +312,7 @@ Cookie: sid=<session>
       "title": "Viết ERD",
       "description": "",
       "deadline": null,
-      "priority": "medium",
+      "priority": null,
       "status": "todo",
       "createdAt": "2026-11-04T04:00:00.000Z"
     }
@@ -313,20 +329,18 @@ Thiếu param thì dùng mặc định. Param có mặt mà sai whitelist thì 4
 | Param | Thiếu thì | Whitelist |
 | --- | --- | --- |
 | `status` | mọi trạng thái của user hiện tại | `todo`, `doing`, `done` |
-| `sort` | `created_at` | `created_at`, `deadline`, `priority`, `title`, `completed_at` |
+| `sort` | `created_at` | `created_at`, `deadline` |
 | `order` | `desc` | `asc`, `desc` |
 
 `sort` dùng tên cột snake_case. `createdAt` không nằm trong whitelist.
 
 Mặc định lần đầu, khớp Dashboard: không lọc status, `sort=created_at`, `order=desc`.
 
-`priority` sắp theo mức, không theo chữ cái: `low` < `medium` < `high`. `order=asc` ra low, medium, high. `order=desc` ra high, medium, low.
 
 `deadline` null luôn đứng cuối, cả `asc` lẫn `desc`. `asc`: ngày sớm trước, ngày muộn sau, null cuối. `desc`: ngày muộn trước, ngày sớm sau, null cuối.
 
 `sort=title` sắp theo giá trị `title`.
 
-`sort=completed_at`: task có `completed_at` null luôn đứng cuối, cả `asc` lẫn `desc`. `desc` là mốc mới trước. Thanh công cụ không hiện lựa chọn này; màn Tổng quan dùng để lấy việc hoàn thành gần đây.
 
 Ví dụ 400: `GET /api/tasks?sort=id`, `GET /api/tasks?order=up`, `GET /api/tasks?status=open`.
 
@@ -381,7 +395,7 @@ Chỉ gửi tiêu đề thì default áp vào response:
     "title": "Mua sữa",
     "description": "",
     "deadline": null,
-    "priority": "medium",
+    "priority": null,
     "status": "todo",
     "createdAt": "2026-11-04T04:00:00.000Z"
   }
@@ -420,7 +434,7 @@ Cookie: sid=<session>
     "title": "Viết ERD",
     "description": "",
     "deadline": null,
-    "priority": "medium",
+    "priority": null,
     "status": "doing",
     "createdAt": "2026-11-04T04:00:00.000Z"
   }
@@ -442,47 +456,16 @@ Ghi chú: `{ "outcomeNote": "Đã nộp báo cáo", "outcomeRating": "met" }`. G
 
 ## GET /api/dashboard
 
-Số liệu của user trong session. Không nhận user id từ client. Không body. Không kiểm tra `Origin`.
+Cần session. Không có query nghiệp vụ; thống kê cố định 7 ngày (hôm nay và 6 ngày trước, UTC+7).
+Trả `200 { dashboard }` với đúng 6 trường:
 
-`period` thiếu thì `7d`. `period` có mặt mà khác `7d` hoặc `30d`: 400 `{ "error": "Khoảng thời gian không hợp lệ" }`. Không session: 401.
+- `completed`: số việc hoàn thành trong 7 ngày, theo `completed_at`.
+- `doing`, `overdue`: số việc đang làm, số việc chưa xong có hạn trước hôm nay.
+- `completion: { done, total, rate }`: toàn bộ công việc; `rate` là 0–1 hoặc `null` khi chưa có việc.
+- `trend`: 7 phần tử `{ date, count }`, có cả ngày không phát sinh.
+- `recentCompleted`: tối đa 5 task hoàn thành, mốc mới nhất trước; task chưa có mốc đứng cuối.
 
-Ngày của kỳ, cột biểu đồ, và mốc quá hạn tính theo Asia/Ho_Chi_Minh (UTC+7, không đổi giờ mùa). `7d` là hôm nay và 6 ngày trước, tính cả hai đầu. `30d` là hôm nay và 29 ngày trước.
-
-```http
-GET /api/dashboard?period=7d
-Cookie: sid=<session>
-```
-
-```json
-200
-{
-  "dashboard": {
-    "period": "7d",
-    "completed": 1,
-    "doing": 2,
-    "overdue": 1,
-    "completion": { "done": 3, "total": 6, "rate": 0.5 },
-    "trend": [
-      { "date": "2026-10-29", "count": 0 },
-      { "date": "2026-11-04", "count": 1 }
-    ]
-  }
-}
-```
-
-`trend` có đúng 7 hoặc 30 phần tử, mỗi ngày một dòng kể cả ngày `count` bằng 0. `date` là `YYYY-MM-DD` theo UTC+7. Ví dụ trên rút gọn các ngày ở giữa.
-
-| Trường | Ý nghĩa |
-| --- | --- |
-| `completed` | Số việc `done` có `completed_at` rơi vào kỳ. Bằng tổng `trend.count` |
-| `doing` | Số việc `doing` hiện tại. Không phụ thuộc `period` |
-| `overdue` | Việc chưa `done`, có `deadline`, và `deadline` nhỏ hơn hôm nay theo UTC+7. Đúng ngày hôm nay chưa quá hạn. Không hạn thì không tính |
-| `completion.done` / `total` | Mọi việc hiện tại của user. `rate` là `done / total`, hoặc `null` khi `total` là 0 |
-| `trend` | Số việc hoàn thành mỗi ngày theo `completed_at` mới nhất, không phải nhật ký sự kiện |
-
-Việc `done` mà `completed_at` là null vẫn nằm trong `completion`, không nằm trong `completed` hay `trend`. Đổi kỳ không đổi `doing`, `overdue`, `completion`.
-
-Việc hoàn thành gần đây không nằm trong payload này. Client gọi `GET /api/tasks?status=done&sort=completed_at&order=desc`.
+Client gọi một API này để dựng toàn bộ màn Tổng quan. Không có chế độ 30 ngày hoặc các trường alias thống kê cũ.
 
 ## DELETE /api/tasks/:id
 
@@ -503,6 +486,18 @@ Xóa được: `204`, không body.
 | `Origin` có và không khớp | 403 | `Nguồn request không hợp lệ` |
 | `:id` không phải số nguyên dương | 400 | `Id không hợp lệ` |
 | Không có task của user này với id đó | 404 | `Không tìm thấy task` |
+
+## Ghi chú — màu giấy và vị trí
+
+Các endpoint ghi chú hiện có cần session, ghi kiểm tra Origin như task: `GET /api/notes` trả `{ notes }`; `POST /api/notes` trả 201 `{ note }`; `PATCH /api/notes/:id` trả 200 `{ note }`; `DELETE /api/notes/:id` trả 204. Không thấy ghi chú của user thì 404 `Không tìm thấy ghi chú`.
+
+Response note gồm `id`, `title`, `content`, `notedOn`, `createdAt`, `updatedAt`, thêm `color` và `position`. Tiêu đề tối đa 120, nội dung tối đa 10000 ký tự; phải có ít nhất một trường khác khoảng trắng. `notedOn` là ngày hợp lệ `YYYY-MM-DD`, mặc định hôm nay UTC+7 khi tạo.
+
+`color` là number nguyên: 0 vàng, 1 xanh lá, 2 hồng, 3 xanh dương. POST thiếu màu thì mặc định 0; PATCH thiếu thì giữ nguyên. Ngoài bốn số này trả 400 `Màu ghi chú không hợp lệ`.
+
+`position` là `null` (chưa đặt vị trí, UI xếp tự động) hoặc `{ x, y }`, mỗi tọa độ là number nguyên từ 0 đến 20000 pixel trên bảng giấy. POST thiếu thì null; PATCH thiếu thì giữ nguyên. Dạng sai hoặc thiếu một tọa độ trả 400 `Vị trí ghi chú không hợp lệ`. PATCH `{ position: { x: 120, y: 350 } }` giữ nguyên nội dung, ngày và màu; sửa nội dung/màu giữ vị trí. Chỉ cập nhật ghi chú thuộc user trong session.
+
+Theo UI lớp nổi mới, thao tác kéo/cất giấy chỉ thay đổi trạng thái client trong phiên, không PATCH vị trí bảng và không DELETE. Không thêm field hoặc endpoint cho trạng thái nổi; vị trí bảng đã lưu và API hiện có vẫn giữ nguyên.
 
 ## Mã HTTP
 

@@ -194,12 +194,34 @@ describe("api", { concurrency: false }, () => {
     assert.equal(res.status, 201);
     assert.equal(res.body.task.description, "");
     assert.equal(res.body.task.deadline, null);
-    assert.equal(res.body.task.priority, "medium");
+    assert.equal(res.body.task.priority, null);
     assert.equal(res.body.task.status, "todo");
     assert.equal(res.body.task.completedAt, null);
     assert.equal(res.body.task.outcomeNote, null);
     assert.equal(res.body.task.outcomeRating, null);
     assert.equal("userId" in res.body.task, false);
+  });
+
+  test("priority is optional, clears to null, rejects medium and preserves ownership", async () => {
+    await register("priority@b.com");
+    await register("other-priority@b.com");
+    const agent = await login("priority@b.com");
+    const other = await login("other-priority@b.com");
+    const created = await agent.post("/api/tasks").send({ title: "No tag" });
+    const id = created.body.task.id;
+    assert.equal(created.body.task.priority, null);
+    for (const priority of ["low", "high", null]) {
+      const saved = await agent.patch(`/api/tasks/${id}`).send({ priority });
+      assert.equal(saved.status, 200);
+      assert.equal(saved.body.task.priority, priority);
+      assert.equal((await agent.patch(`/api/tasks/${id}`).send({ title: "Keep tag" })).body.task.priority, priority);
+    }
+    for (const priority of ["medium", "", false, 1]) {
+      assert.equal((await agent.post("/api/tasks").send({ title: "Invalid", priority })).status, 400);
+      assert.equal((await agent.patch(`/api/tasks/${id}`).send({ priority })).status, 400);
+    }
+    assert.equal((await agent.get("/api/tasks?priority=medium")).status, 400);
+    assert.equal((await other.patch(`/api/tasks/${id}`).send({ priority: "high" })).status, 404);
   });
 
   test("AC-IGN body userId bị bỏ qua", async () => {
@@ -262,19 +284,12 @@ describe("api", { concurrency: false }, () => {
     assert.equal(guest.body.error, "Chưa đăng nhập");
     await register("dash@b.com");
     const agent = await login("dash@b.com");
-    const bad = await agent.get("/api/dashboard?period=1d");
-    assert.equal(bad.status, 400);
-    assert.equal(bad.body.error, "Khoảng thời gian không hợp lệ");
     const ok = await agent.get("/api/dashboard");
     assert.equal(ok.status, 200);
-    assert.equal(ok.body.dashboard.period, "7d");
     assert.equal(ok.body.dashboard.completed, 0);
     assert.equal(ok.body.dashboard.completion.rate, null);
     assert.equal(ok.body.dashboard.trend.length, 7);
     assert.ok(ok.body.dashboard.trend.every((day) => day.count === 0));
-    assert.equal(ok.body.dashboard.completedLast7Days, 0);
-    assert.equal(ok.body.dashboard.completionRate, null);
-    assert.equal(ok.body.dashboard.dailyCompletions.length, 7);
     assert.deepEqual(ok.body.dashboard.recentCompleted, []);
   });
 
@@ -295,8 +310,6 @@ describe("api", { concurrency: false }, () => {
     assert.equal(badDay.status, 400);
     assert.equal(badDay.body.error, "Ngày ghi chú không hợp lệ");
     const id = created.body.note.id;
-    const stolen = await b.get(`/api/notes/${id}`);
-    assert.equal(stolen.status, 404);
     const patched = await b.patch(`/api/notes/${id}`).send({ content: "hack" });
     assert.equal(patched.status, 404);
     const dated = await a.patch(`/api/notes/${id}`).send({ notedOn: "2026-10-02" });
@@ -354,10 +367,10 @@ describe("api", { concurrency: false }, () => {
     const again = await a.patch(`/api/tasks/${id}`).send({ status: "done" });
     assert.equal(typeof again.body.task.completedAt, "string");
     assert.equal(again.body.task.outcomeNote, "Kết quả thật");
-    const dashA = await a.get("/api/dashboard?period=30d");
-    const dashB = await b.get("/api/dashboard?period=7d");
+    const dashA = await a.get("/api/dashboard");
+    const dashB = await b.get("/api/dashboard");
     assert.equal(dashA.status, 200);
-    assert.equal(dashA.body.dashboard.trend.length, 30);
+    assert.equal(dashA.body.dashboard.trend.length, 7);
     assert.ok(dashA.body.dashboard.completed >= 1);
     assert.equal(dashB.body.dashboard.completed, 0);
     assert.equal(dashB.body.dashboard.completion.total, 0);
@@ -376,15 +389,11 @@ describe("api", { concurrency: false }, () => {
     db.prepare("UPDATE tasks SET completed_at = ? WHERE id = ?").run("2026-11-01T00:00:00.000Z", older.body.task.id);
     db.prepare("UPDATE tasks SET completed_at = ? WHERE id = ?").run("2026-11-03T00:00:00.000Z", newer.body.task.id);
     db.prepare("UPDATE tasks SET completed_at = NULL WHERE id = ?").run(legacy.body.task.id);
-    const desc = await agent.get("/api/tasks?status=done&sort=completed_at&order=desc");
-    assert.deepEqual(
-      desc.body.tasks.map((task) => task.title),
-      ["mới", "cũ", "không mốc"],
-    );
-    const asc = await agent.get("/api/tasks?status=done&sort=completed_at&order=asc");
-    assert.deepEqual(
-      asc.body.tasks.map((task) => task.title),
-      ["cũ", "mới", "không mốc"],
-    );
+    const dashboard = await agent.get("/api/dashboard");
+    assert.deepEqual(dashboard.body.dashboard.recentCompleted.map((task) => task.title), ["mới", "cũ", "không mốc"]);
+    assert.deepEqual(Object.keys(dashboard.body.dashboard).sort(), ["completed", "completion", "doing", "overdue", "recentCompleted", "trend"]);
+    for (const sort of ["completed_at", "priority", "title"]) {
+      assert.equal((await agent.get(`/api/tasks?sort=${sort}`)).status, 400);
+    }
   });
 });

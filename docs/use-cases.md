@@ -22,14 +22,14 @@ Mỗi user chỉ thấy và sửa task của mình.
 | BR-05 | Tiêu đề sau khi trim dài từ 1 đến 200 ký tự |
 | BR-06 | Mô tả tối đa 2000 ký tự. Bỏ trống thì lưu `""` |
 | BR-07 | `status` chỉ `todo`, `doing`, `done`. Thiếu khi tạo thì `todo` |
-| BR-08 | `priority` chỉ `low`, `medium`, `high`. Thiếu khi tạo thì `medium` |
+| BR-08 | `priority` nhận `low`, `high`, `null`. Thiếu khi tạo thì `null` (không gắn ưu tiên) |
 | BR-09 | `deadline` là ngày lịch hợp lệ `YYYY-MM-DD`, hoặc bỏ trống thành NULL. `2026-02-31` là không hợp lệ |
 | BR-10 | Khách không được gọi API task |
 | BR-11 | User chỉ đọc, sửa, xóa task có `user_id` trùng session. Task của người khác trả 404 |
 | BR-12 | `user_id` lấy từ session. Body có gửi `userId` thì bỏ qua |
 | BR-13 | Đăng nhập sai email hoặc sai mật khẩu cùng một thông báo |
 | BR-14 | Filter `status`, `sort`, `order` sai whitelist thì 400 |
-| BR-15 | `sort` whitelist: `created_at`, `deadline`, `priority`, `title`, `completed_at`. `order`: `asc`, `desc` |
+| BR-15 | `sort` whitelist: `created_at`, `deadline`. `order`: `asc`, `desc` |
 | BR-16 | Lần đầu vào `done` thì ghi `completed_at`. Sửa việc đã `done` không đổi mốc đó. Mở lại thì xóa mốc. Hoàn thành lại thì ghi mốc mới. Client gửi `completedAt` thì bỏ qua |
 | BR-17 | `outcome_note` và `outcome_rating` tùy chọn, chỉ ghi khi việc đang hoặc vừa thành `done`. Mở lại không xóa ghi chú. Rating chỉ `good`, `met`, `improve` hoặc NULL. Note tối đa 2000, trim xong rỗng thì NULL |
 | BR-18 | Tổng quan chỉ tính task của session. Ngày theo Asia/Ho_Chi_Minh (UTC+7). Quá hạn khi hạn nhỏ hơn ngày đó và việc chưa `done`. Không hạn thì không quá hạn. Tỷ lệ là số `done` hiện tại / tổng việc; chưa có việc thì `null` |
@@ -188,10 +188,10 @@ Bỏ `status` nghĩa là lấy mọi trạng thái của user hiện tại.
 
 ```json
 200
-{ "tasks": [ { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": "medium", "status": "todo", "createdAt": "2026-11-04T04:00:00.000Z" } ] }
+{ "tasks": [ { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": null, "status": "todo", "createdAt": "2026-11-04T04:00:00.000Z" } ] }
 ```
 
-Thứ tự và NULL deadline theo `docs/erd.md`. `priority` sắp theo mức low < medium < high, không theo chữ cái.
+Thứ tự và NULL deadline theo `docs/erd.md`.
 
 Tiêu chí: TC06 lọc đúng trạng thái. TC07 deadline đúng thứ tự. Danh sách không chứa task của user khác.
 
@@ -211,7 +211,7 @@ Content-Type: application/json
 
 ```json
 200
-{ "task": { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": "medium", "status": "doing", "createdAt": "2026-11-04T04:00:00.000Z" } }
+{ "task": { "id": 15, "title": "Viết ERD", "description": "", "deadline": null, "priority": null, "status": "doing", "createdAt": "2026-11-04T04:00:00.000Z" } }
 ```
 
 Đường đi trên server, đúng thứ tự lớp:
@@ -265,9 +265,23 @@ Kiểm tra sở hữu nằm ở Service và điều kiện `user_id` ở Reposit
 
 Đổi việc sang Hoàn thành không bắt buộc ghi chú. Sau đó có thể bỏ qua hoặc gửi `outcomeNote` / `outcomeRating`. Xem và sửa lại từ form việc đã hoàn thành, hoặc từ màn Tổng quan.
 
-`GET /api/dashboard?period=7d` hoặc `30d`. `period` khác hai giá trị đó: 400. Không có session: 401. Không nhận user id từ client.
+`GET /api/dashboard` thống kê cố định 7 ngày, trả cả 5 việc hoàn thành gần đây. Không có session: 401. Không nhận user id từ client.
 
 `completed` và `trend` đếm việc `done` có `completed_at` trong kỳ. `doing`, `overdue`, `completion` là trạng thái hiện tại, không đổi theo kỳ. Việc `done` không có `completed_at` vẫn tính vào tỷ lệ, không tính vào biểu đồ.
+
+## UC-12 Chia công việc theo dự án
+
+- Tác nhân: User
+
+Tạo dự án với tên 1–80 ký tự và màu; sửa tên/màu hoặc xóa từ màn dự án. Sidebar hiển thị các dự án của user cùng số việc chưa hoàn thành. Chọn dự án để xem riêng hoặc chọn Tất cả để xem danh sách nhóm theo dự án.
+
+Thêm/sửa task chọn dự án của mình hoặc Chưa chia dự án. Thanh nhập nhanh thêm vào dự án đang chọn khi nhấn Enter. Các bộ lọc trạng thái, độ ưu tiên, thời hạn và tìm tiêu đề/mô tả kết hợp với dự án.
+
+`/api/projects` cần session; ghi cần Origin hợp lệ. Dự án và task đều lọc theo chủ sở hữu. Không được gán task sang dự án của người khác. Xóa dự án cần xác nhận và giữ mọi task, chuyển về Chưa chia dự án. Dữ liệu task cũ không có dự án vẫn hiện đầy đủ.
+
+## UC-13 Sắp xếp giấy ghi chú
+
+User tạo/sửa ghi chú chọn một trong bốn màu giấy. Kéo thanh đầu hoặc dùng phím mũi tên để đưa giấy ra lớp nổi. Menu chỉ giữ Sửa/Xóa. Giấy nổi giữ vị trí trên màn hình khi đổi mục hoặc cuộn trang; có thể sửa nội dung/màu và xác nhận xóa tại đó. Nút X cất giấy về bảng Ghi chú, không xóa nội dung và không chuyển trang hiện tại. Tải lại hoặc đăng xuất cũng cất về bảng; dữ liệu và vị trí bảng cũ vẫn giữ. Danh sách ghi chú dọc được bỏ. Không tách giấy thành cửa sổ ngoài trình duyệt.
 
 ## Việc nằm ngoài use case
 

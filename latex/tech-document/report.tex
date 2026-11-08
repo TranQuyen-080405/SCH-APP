@@ -1,0 +1,21 @@
+\documentclass[twoside,final]{hcmut-report}
+\usepackage{array,longtable,tabularx}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\coursename{KITS MiniProject}
+\reporttype{TECHNICAL DOCUMENTATION}
+\title{Personal Task Management}
+\stuname{Bùi Trần Quyền \\}
+
+\begin{document}
+\coverpage
+\tableofcontents
+\clearpage
+
+\input{chapters/system-overview.tex}
+\input{chapters/system-architecture.tex}
+\input{chapters/database-design.tex}
+\input{chapters/api-documentation.tex}
+\input{chapters/installation-deployment.tex}
+
+\end{document}

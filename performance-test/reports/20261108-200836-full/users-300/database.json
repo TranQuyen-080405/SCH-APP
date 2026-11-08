@@ -1,0 +1,14 @@
+{
+  "duration_seconds": 300.0764604,
+  "queries": 65013,
+  "avg_ms": 0.7178917570332138,
+  "p50_ms": 0.23010000001522712,
+  "p95_ms": 3.795299999997951,
+  "p99_ms": 6.045599999997648,
+  "max_ms": 18.08980000000156,
+  "slow_threshold_ms": 100,
+  "slow_count": 0,
+  "slow_queries": [],
+  "connections": 1,
+  "connection_pool": null
+}

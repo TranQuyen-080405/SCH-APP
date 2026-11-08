@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import FormField from "./FormField.jsx";
+import Select from "./Select.jsx";
 
 export const RATING_LABELS = {
   good: "Tốt",
@@ -28,13 +29,7 @@ export function OutcomeFields({
     <div className="flex flex-col gap-4">
       {heading ? <h3 className="text-base font-medium text-ink">Kết quả công việc</h3> : null}
       <FormField label="Tự đánh giá" name="outcomeRating" error={ratingError}>
-        <select value={rating} onChange={(event) => onRating(event.target.value)} className="h-11">
-          {RATINGS.map(([id, label]) => (
-            <option key={id || "none"} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select value={rating} onChange={onRating} options={RATINGS} className="h-11" />
       </FormField>
       <FormField label="Ghi chú kết quả" name="outcomeNote" error={noteError}>
         <textarea

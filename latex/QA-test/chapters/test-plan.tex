@@ -1,0 +1,42 @@
+\section{Kế hoạch kiểm thử (Test Plan)}
+
+\subsection{Kịch bản kiểm thử (Test Cases)}
+\begin{center}
+\small
+\begin{tabular}{@{}lp{8.6cm}l@{}}
+\toprule
+\textbf{ID} & \textbf{Thao tác và kết quả mong đợi} & \textbf{Kết quả} \\
+\midrule
+TC01 & Đăng ký hợp lệ: HTTP 201, chưa tạo session. & Đạt \\
+TC02 & Đăng ký email trùng: HTTP 409. & Đạt \\
+TC03 & Sai mật khẩu: HTTP 401, không tạo cookie. & Đạt \\
+TC04 & Tạo task thiếu tiêu đề: HTTP 400. & Đạt \\
+TC05 & Chuyển todo $\to$ doing $\to$ done: lưu đúng trạng thái. & Đạt \\
+TC06 & Lọc doing: chỉ trả task đúng trạng thái, đúng chủ. & Đạt \\
+TC07 & Sắp deadline tăng: task không hạn nằm cuối. & Đạt \\
+TC08 & Sửa/xóa task tài khoản khác: HTTP 404, giữ dữ liệu. & Đạt \\
+TC09 & Khách gọi API task: HTTP 401. & Đạt \\
+TC10 & Xóa task của mình: HTTP 204, danh sách không còn task. & Đạt \\
+PRIO & Bỏ ưu tiên về NULL; từ chối mức cũ, giữ quyền sở hữu. & Đạt \\
+MIG & Migration giữ dữ liệu/khóa ngoại, chạy lại và rollback lỗi. & Đạt \\
+CLEAN & Tổng quan trả 6 trường; API ghi chú đã bỏ trả JSON 404. & Đạt \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Phương pháp kiểm thử}
+\begin{itemize}
+  \item Chức năng: \texttt{node:test}, Supertest và test logic frontend;
+  kiểm tra thêm build production của client.
+  \item Benchmark lịch sử ngày 08/11: lần lượt 100, 300, 500 và 1.000 users;
+  tăng 10 users/giây, đợi đăng nhập đủ, warm-up 30 giây, đo ổn định 5 phút/mức.
+  Mỗi user có session riêng, nghỉ 1--3 giây giữa các hành động.
+  \item Dữ liệu mỗi tài khoản: 20 công việc, 3 dự án, 5 ghi chú.
+  Trọng số đọc danh sách/lọc/thống kê/dự án/ghi chú/hồ sơ là 6/3/3/2/2/1;
+  sửa task là 2, tạo--xóa task là 1. Trọng số theo hành động, không theo request.
+  Không tính đăng nhập và warm-up vào thống kê chính.
+  Đợt refactor ngày 09/11 kiểm tra lại kịch bản với 20 users, đo 20 giây sau warm-up 3 giây.
+  \item Thu thập RPS, latency trung bình/P50/P95/P99, tỷ lệ lỗi;
+  CPU/RSS Node, I/O toàn máy và latency query SQLite.
+  Chưa đặt ngưỡng nghiệm thu hiệu năng; không suy diễn kết quả thành SLA.
+\end{itemize}

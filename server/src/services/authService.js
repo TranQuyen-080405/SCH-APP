@@ -1,11 +1,7 @@
 import { HttpError } from "../errors.js";
+import { asObject } from "../validation.js";
 import * as userRepository from "../repositories/userRepository.js";
 import { hashPassword, verifyPassword } from "./password.js";
-
-function asObject(value) {
-  if (value && typeof value === "object" && !Array.isArray(value)) return value;
-  return {};
-}
 
 function normalizeEmail(email) {
   if (typeof email !== "string" || email.trim() === "") {

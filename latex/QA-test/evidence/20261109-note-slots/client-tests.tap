@@ -1,0 +1,98 @@
+﻿
+> test
+> node --test --test-reporter=tap
+
+TAP version 13
+# Subtest: notes fit a narrow board and form columns when there is room
+ok 1 - notes fit a narrow board and form columns when there is room
+  ---
+  duration_ms: 2.0516
+  type: 'test'
+  ...
+# Subtest: saved paper positions survive resizing and remain accessible in the board
+ok 2 - saved paper positions survive resizing and remain accessible in the board
+  ---
+  duration_ms: 0.1733
+  type: 'test'
+  ...
+# Subtest: legacy overlapping positions snap into separate slots
+ok 3 - legacy overlapping positions snap into separate slots
+  ---
+  duration_ms: 0.1509
+  type: 'test'
+  ...
+# Subtest: a docked paper keeps its slot when a floating paper previously occupied it
+ok 4 - a docked paper keeps its slot when a floating paper previously occupied it
+  ---
+  duration_ms: 0.1343
+  type: 'test'
+  ...
+# Subtest: lifting a paper leaves its frame and other papers in place
+ok 5 - lifting a paper leaves its frame and other papers in place
+  ---
+  duration_ms: 0.2023
+  type: 'test'
+  ...
+# Subtest: floating paper coordinates stay inside the viewport with a reachable close button
+ok 6 - floating paper coordinates stay inside the viewport with a reachable close button
+  ---
+  duration_ms: 0.1328
+  type: 'test'
+  ...
+# Subtest: floating paper leaves mobile navigation uncovered after resizing
+ok 7 - floating paper leaves mobile navigation uncovered after resizing
+  ---
+  duration_ms: 0.0909
+  type: 'test'
+  ...
+# Subtest: floating paper shrinks on short screens while keeping its header accessible
+ok 8 - floating paper shrinks on short screens while keeping its header accessible
+  ---
+  duration_ms: 0.0675
+  type: 'test'
+  ...
+# Subtest: task and calendar badges hide missing priority; only low/high render
+ok 9 - task and calendar badges hide missing priority; only low/high render
+  ---
+  duration_ms: 323.1692
+  type: 'test'
+  ...
+# Subtest: create and edit forms select no priority for null; medium is not an option
+ok 10 - create and edit forms select no priority for null; medium is not an option
+  ---
+  duration_ms: 35.8501
+  type: 'test'
+  ...
+# Subtest: date shifting handles leap days and year boundaries
+ok 11 - date shifting handles leap days and year boundaries
+  ---
+  duration_ms: 1.3433
+  type: 'test'
+  ...
+# Subtest: project groups preserve every task, including legacy unassigned and a project awaiting refresh
+ok 12 - project groups preserve every task, including legacy unassigned and a project awaiting refresh
+  ---
+  duration_ms: 1.1916
+  type: 'test'
+  ...
+# Subtest: seven day shortcut includes today and six following days only
+ok 13 - seven day shortcut includes today and six following days only
+  ---
+  duration_ms: 0.1706
+  type: 'test'
+  ...
+# Subtest: overdue shortcut excludes completed tasks, today, and tasks without deadlines
+ok 14 - overdue shortcut excludes completed tasks, today, and tasks without deadlines
+  ---
+  duration_ms: 0.0913
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 768.3274

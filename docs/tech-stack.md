@@ -50,7 +50,9 @@ CLIENT_ORIGIN=http://localhost:5173
 DATABASE_PATH=./data/app.db
 ```
 
-Thiếu `SESSION_SECRET` thì process thoát ngay lúc khởi động.
+Thiếu `SESSION_SECRET` thì mọi request trả 500 `Thiếu SESSION_SECRET`. Process vẫn nghe cổng, để host không biến lần khởi động thành lỗi nền tảng.
+
+Image Docker không ghim `PORT`. Máy local và Compose đặt `PORT=3000`. Vercel không đặt `PORT` thì process nghe cổng 80, đúng cổng router của container.
 
 Chạy server từ thư mục `server/`. `DATABASE_PATH=./data/app.db` là đường dẫn tương đối theo thư mục đang đứng:
 
@@ -59,6 +61,16 @@ node --env-file=.env src/server.js
 ```
 
 Không thêm gói `dotenv`. Node 26 đọc `--env-file` sẵn.
+
+### Deploy client và server riêng
+
+- Local: `client/.env` để `VITE_API_URL=` trống, tiếp tục dùng proxy Vite. Server dùng `server/.env` như trên; cookie mặc định `lax`, không yêu cầu HTTPS.
+- Deploy: dùng `client/.env.production.example` và `server/.env.production.example` làm mẫu nhập Environment Variables cho từng project. Thay URL mẫu bằng domain thật, không có dấu `/` cuối. `VITE_API_URL` chỉ gồm origin backend, không thêm `/api`.
+- Client: `VITE_API_URL=https://my-server.vercel.app`. Build/deploy lại client sau khi đổi biến vì Vite nhúng giá trị khi build.
+- Server: `CLIENT_ORIGIN=https://my-client.vercel.app`, `SESSION_SECRET` ngẫu nhiên đủ dài, `SESSION_COOKIE_SECURE=true`, `SESSION_COOKIE_SAME_SITE=none`. Không đưa `SESSION_SECRET` vào client. Các biến cookie này ghi đè mặc định localhost khi triển khai khác site qua HTTPS.
+- API client gửi `credentials: "include"`; server cho phép CORS đúng `CLIENT_ORIGIN`, hỗ trợ preflight và credentials. Kiểm tra Origin cho request ghi vẫn giữ nguyên. Cookie secure dùng `trust proxy=1`, cần backend nằm sau proxy tin cậy.
+- Trình duyệt chặn cookie bên thứ ba có thể ngăn đăng nhập giữa hai site riêng; khi đó dùng domain cùng site hoặc proxy `/api` qua client.
+- Đây là cấu hình kết nối, chưa thay đổi cách host SQLite và MemoryStore: cần nơi lưu database bền vững; MemoryStore mất phiên khi restart và không chia sẻ giữa nhiều instance.
 
 ## Việc của từng lớp backend
 

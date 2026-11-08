@@ -1,7 +1,7 @@
 import { getDb } from "../db/connection.js";
 
 const COLUMNS =
-  "id, title, description, deadline, priority, status, created_at, completed_at, outcome_note, outcome_rating";
+  "id, title, description, deadline, priority, status, created_at, completed_at, outcome_note, outcome_rating, project_id";
 
 function mapTask(row) {
   if (!row) return null;
@@ -12,6 +12,7 @@ function mapTask(row) {
     deadline: row.deadline,
     priority: row.priority,
     status: row.status,
+    projectId: row.project_id,
     createdAt: row.created_at,
     completedAt: row.completed_at,
     outcomeNote: row.outcome_note,
@@ -21,13 +22,8 @@ function mapTask(row) {
 
 function orderSql(sort, order) {
   const dir = order === "asc" ? "ASC" : "DESC";
-  if (sort === "created_at") return `created_at ${dir}`;
-  if (sort === "title") return `title ${dir}`;
-  if (sort === "deadline") return `deadline IS NULL, deadline ${dir}`;
-  if (sort === "completed_at") return `completed_at IS NULL, completed_at ${dir}`;
-  if (sort === "priority") {
-    return `CASE priority WHEN 'low' THEN 1 WHEN 'medium' THEN 2 WHEN 'high' THEN 3 END ${dir}`;
-  }
+  if (sort === "created_at") return `created_at ${dir}, id ${dir}`;
+  if (sort === "deadline") return `deadline IS NULL, deadline ${dir}, id ${dir}`;
   throw new Error("Cột sắp xếp không hợp lệ");
 }
 
@@ -36,21 +32,22 @@ export function create({
   title,
   description,
   deadline,
-  priority,
+  priority = null,
   status,
   completedAt = null,
   outcomeNote = null,
   outcomeRating = null,
+  projectId = null,
 }) {
   const row = getDb()
     .prepare(
       `INSERT INTO tasks (
-         user_id, title, description, deadline, priority, status, completed_at, outcome_note, outcome_rating
+         user_id, title, description, deadline, priority, status, completed_at, outcome_note, outcome_rating, project_id
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING ${COLUMNS}`,
     )
-    .get(userId, title, description, deadline, priority, status, completedAt, outcomeNote, outcomeRating);
+    .get(userId, title, description, deadline, priority, status, completedAt, outcomeNote, outcomeRating, projectId);
   return mapTask(row);
 }
 
@@ -60,13 +57,16 @@ export function findOwned({ userId, id }) {
   );
 }
 
-export function list({ userId, status, sort, order }) {
+export function list({ userId, status, priority, projectId, sort, order }) {
   const params = [userId];
   let where = "user_id = ?";
   if (status != null) {
     where += " AND status = ?";
     params.push(status);
   }
+  if (priority != null) { where += " AND priority = ?"; params.push(priority); }
+  if (projectId === null) where += " AND project_id IS NULL";
+  else if (projectId !== undefined) { where += " AND project_id = ?"; params.push(projectId); }
   const rows = getDb()
     .prepare(`SELECT ${COLUMNS} FROM tasks WHERE ${where} ORDER BY ${orderSql(sort, order)}`)
     .all(...params);
@@ -82,6 +82,7 @@ export function update({ userId, id, fields }) {
     ["deadline", "deadline"],
     ["priority", "priority"],
     ["status", "status"],
+    ["projectId", "project_id"],
     ["completedAt", "completed_at"],
     ["outcomeNote", "outcome_note"],
     ["outcomeRating", "outcome_rating"],
@@ -135,8 +136,8 @@ export function recentCompleted({ userId, limit }) {
   return getDb()
     .prepare(
       `SELECT ${COLUMNS} FROM tasks
-       WHERE user_id = ? AND status = 'done' AND completed_at IS NOT NULL
-       ORDER BY completed_at DESC
+       WHERE user_id = ? AND status = 'done'
+       ORDER BY completed_at IS NULL, completed_at DESC, id DESC
        LIMIT ?`,
     )
     .all(userId, limit)

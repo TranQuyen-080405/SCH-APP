@@ -4,10 +4,6 @@ export async function list(req, res) {
   res.json({ notes: noteService.list(req.session.userId) });
 }
 
-export async function show(req, res) {
-  res.json({ note: noteService.get(req.session.userId, req.params.id) });
-}
-
 export async function create(req, res) {
   res.status(201).json({ note: noteService.create(req.session.userId, req.body) });
 }

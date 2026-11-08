@@ -1,0 +1,70 @@
+﻿TAP version 13
+# Subtest: notes fit a narrow board and form columns when there is room
+ok 1 - notes fit a narrow board and form columns when there is room
+  ---
+  duration_ms: 3.3819
+  type: 'test'
+  ...
+# Subtest: saved paper positions survive resizing and remain accessible in the board
+ok 2 - saved paper positions survive resizing and remain accessible in the board
+  ---
+  duration_ms: 1.0042
+  type: 'test'
+  ...
+# Subtest: unplaced notes avoid saved papers without moving other saved papers
+ok 3 - unplaced notes avoid saved papers without moving other saved papers
+  ---
+  duration_ms: 0.179
+  type: 'test'
+  ...
+# Subtest: floating paper coordinates stay inside the viewport with a reachable close button
+ok 4 - floating paper coordinates stay inside the viewport with a reachable close button
+  ---
+  duration_ms: 0.208
+  type: 'test'
+  ...
+# Subtest: floating paper leaves mobile navigation uncovered after resizing
+ok 5 - floating paper leaves mobile navigation uncovered after resizing
+  ---
+  duration_ms: 0.811
+  type: 'test'
+  ...
+# Subtest: floating paper shrinks on short screens while keeping its header accessible
+ok 6 - floating paper shrinks on short screens while keeping its header accessible
+  ---
+  duration_ms: 0.1132
+  type: 'test'
+  ...
+# Subtest: date shifting handles leap days and year boundaries
+ok 7 - date shifting handles leap days and year boundaries
+  ---
+  duration_ms: 2.0452
+  type: 'test'
+  ...
+# Subtest: project groups preserve every task, including legacy unassigned and a project awaiting refresh
+ok 8 - project groups preserve every task, including legacy unassigned and a project awaiting refresh
+  ---
+  duration_ms: 1.6249
+  type: 'test'
+  ...
+# Subtest: seven day shortcut includes today and six following days only
+ok 9 - seven day shortcut includes today and six following days only
+  ---
+  duration_ms: 0.2216
+  type: 'test'
+  ...
+# Subtest: overdue shortcut excludes completed tasks, today, and tasks without deadlines
+ok 10 - overdue shortcut excludes completed tasks, today, and tasks without deadlines
+  ---
+  duration_ms: 0.1199
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 161.6292

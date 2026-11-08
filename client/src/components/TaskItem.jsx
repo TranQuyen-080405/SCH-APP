@@ -1,122 +1,132 @@
 import { useEffect, useRef, useState } from "react";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal } from "lucide-react";
 import { formatDay, isOverdue } from "../dates.js";
-import PriorityBadge from "./PriorityBadge.jsx";
 import StatusSelect from "./StatusSelect.jsx";
+import PriorityBadge from "./PriorityBadge.jsx";
 
-export default function TaskItem({ task, pending, onEdit, onDelete, onStatus }) {
+export default function TaskItem({
+  task,
+  pending,
+  onEdit,
+  onDelete,
+  onStatus,
+}) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
-  const description = task.description?.trim() ? task.description : "";
   const overdue = isOverdue(task.deadline, task.status);
-
   useEffect(() => {
     if (!open) return undefined;
-    function onPointerDown(event) {
-      if (!menuRef.current?.contains(event.target)) setOpen(false);
+    function close(event) {
+      if (
+        event.type === "keydown"
+          ? event.key === "Escape"
+          : !menuRef.current?.contains(event.target)
+      )
+        setOpen(false);
     }
-    function onKeyDown(event) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
     return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
     };
   }, [open]);
 
+  const deadline = task.deadline ? (
+    <span
+      className={`text-[12px] whitespace-nowrap ${overdue ? "text-danger" : "text-muted"}`}
+    >
+      {formatDay(task.deadline)}
+      {overdue ? " · Quá hạn" : ""}
+    </span>
+  ) : null;
   return (
-    <article className="rounded-card border border-line bg-surface p-4 md:min-h-[76px] md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-x-4">
-      <div className="min-w-0 md:col-start-1 md:row-start-1">
-        <div className="flex items-start gap-2">
-          <h2 className="line-clamp-2 min-w-0 flex-1 text-[15px] font-semibold break-words text-ink">
-            {task.title}
-          </h2>
-          <div ref={menuRef} className="relative md:hidden">
-            <button
-              type="button"
-              className="flex h-11 w-11 items-center justify-center"
-              aria-label="Mở menu công việc"
-              aria-haspopup="menu"
-              aria-expanded={open}
-              onClick={() => setOpen((value) => !value)}
-            >
-              <MoreHorizontal size={20} aria-hidden="true" />
-            </button>
-            {open ? (
-              <div
-                role="menu"
-                className="absolute right-0 z-20 mt-1 w-40 rounded-card border border-line bg-surface p-1 shadow-overlay"
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex h-11 w-full items-center rounded-control px-3 text-left"
-                  onClick={() => {
-                    setOpen(false);
-                    onEdit(task);
-                  }}
-                >
-                  Sửa
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex h-11 w-full items-center rounded-control px-3 text-left text-danger"
-                  onClick={() => {
-                    setOpen(false);
-                    onDelete(task);
-                  }}
-                >
-                  Xóa
-                </button>
-              </div>
-            ) : null}
-          </div>
-        </div>
-        {description ? (
-          <p className="mt-1 line-clamp-2 text-sm break-words whitespace-pre-wrap text-muted">
-            {description}
-          </p>
-        ) : null}
-      </div>
-
-      {task.deadline || task.priority ? (
-        <div className="mt-2 flex flex-col gap-2 md:col-start-1 md:row-start-2 md:flex-row md:flex-wrap md:items-center">
-          {task.deadline ? (
-            <p className={`text-sm ${overdue ? "text-danger" : "text-muted"}`}>
-              {formatDay(task.deadline)}
-              {overdue ? " · Quá hạn" : ""}
-            </p>
-          ) : null}
-          <PriorityBadge priority={task.priority} />
-        </div>
-      ) : null}
-
-      <div className="mt-3 flex items-center gap-2 md:col-start-2 md:row-start-1 md:mt-0">
+    <article className="flex min-h-16 flex-wrap items-center gap-x-2 rounded-card bg-surface px-2 py-1.5">
+      <button
+        type="button"
+        disabled={pending}
+        aria-label={`${task.status === "done" ? "Mở lại" : "Hoàn thành"}: ${task.title}`}
+        aria-pressed={task.status === "done"}
+        onClick={() => onStatus(task, task.status === "done" ? "todo" : "done")}
+        className="grid size-11 shrink-0 place-items-center rounded-control text-muted hover:text-primary disabled:opacity-50"
+      >
+        <span
+          className={`grid size-[17px] place-items-center rounded-full border ${task.status === "done" ? "border-primary bg-primary text-white" : overdue ? "border-danger" : "border-current"}`}
+        >
+          {task.status === "done" && <Check size={12} aria-hidden="true" />}
+        </span>
+      </button>
+      <button
+        type="button"
+        aria-label={task.title}
+        className="flex min-h-11 min-w-0 flex-1 flex-col justify-center gap-1 py-1 text-left"
+        onClick={() => onEdit(task)}
+      >
+        <span
+          className={`line-clamp-2 text-sm leading-5 break-words ${task.status === "done" ? "text-muted line-through" : "text-ink"}`}
+        >
+          {task.title}
+        </span>
+        <PriorityBadge priority={task.priority} />
+      </button>
+      <div className="hidden shrink-0 items-center gap-4 pl-2 md:flex">
+        {deadline}
         <StatusSelect
-          className="w-full min-w-0 flex-1 md:w-auto md:flex-none"
           value={task.status}
           disabled={pending}
+          className="!h-9 !border-0 !bg-transparent !px-2 !text-[12px]"
           onChange={(status) => onStatus(task, status)}
         />
+      </div>
+      <div ref={menuRef} className="relative">
         <button
           type="button"
-          className="hidden h-11 w-11 items-center justify-center md:flex"
-          aria-label="Sửa công việc"
-          onClick={() => onEdit(task)}
+          aria-label="Mở menu công việc"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          className="grid size-11 place-items-center rounded-control text-muted hover:bg-doing-bg hover:text-primary"
         >
-          <Pencil size={20} aria-hidden="true" />
+          <MoreHorizontal size={18} aria-hidden="true" />
         </button>
-        <button
-          type="button"
-          className="hidden h-11 w-11 items-center justify-center text-danger md:flex"
-          aria-label="Xóa công việc"
-          onClick={() => onDelete(task)}
-        >
-          <Trash2 size={20} aria-hidden="true" />
-        </button>
+        {open && (
+          <div
+            role="menu"
+            className="dropdown-panel absolute right-0 z-20 mt-1.5 w-40"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              className="flex h-11 w-full items-center rounded-control px-3 text-left text-sm hover:bg-doing-bg hover:text-primary"
+              onClick={() => {
+                setOpen(false);
+                onEdit(task);
+              }}
+            >
+              Sửa
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="flex h-11 w-full items-center rounded-control px-3 text-left text-sm text-danger hover:bg-high-bg"
+              onClick={() => {
+                setOpen(false);
+                onDelete(task);
+              }}
+            >
+              Xóa
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="ml-11 flex w-[calc(100%_-_2.75rem)] flex-wrap items-center justify-between gap-2 pb-1 md:hidden">
+        {deadline}
+        <StatusSelect
+          value={task.status}
+          disabled={pending}
+          className="!h-11 max-w-40 !border-0 !bg-transparent !px-0 !text-[12px]"
+          onChange={(status) => onStatus(task, status)}
+        />
       </div>
     </article>
   );

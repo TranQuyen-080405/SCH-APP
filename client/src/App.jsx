@@ -10,7 +10,7 @@ import TasksPage from "./pages/TasksPage.jsx";
 
 export default function App() {
   return (
-    <div className="min-h-dvh bg-canvas font-sans text-sm text-ink">
+    <div className="flow-root min-h-dvh bg-frame font-sans text-sm text-ink">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

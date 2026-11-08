@@ -25,7 +25,6 @@ export default function EmptyState({ variant, onRetry, message }) {
   return (
     <div className="px-4 py-8 text-center" role="status">
       <p>Chưa có công việc nào.</p>
-      <p className="mt-2 text-sm text-muted">Thêm công việc đầu tiên để bắt đầu.</p>
     </div>
   );
 }

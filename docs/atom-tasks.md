@@ -53,7 +53,7 @@ Xong khi: `npm ls react vite react-router` đúng version, `npm run dev` mở đ
 Việc:
 
 1. Proxy Vite `/api` → `http://localhost:3000`, cổng client 5173.
-2. `server.js` thoát nếu thiếu `SESSION_SECRET`. Nghe `PORT`. Chỉ file này gọi `listen`.
+2. `server.js` nghe `PORT` (không có thì 3000; trên Vercel thì 80). Thiếu `SESSION_SECRET` thì mọi response là 500 `Thiếu SESSION_SECRET`, không `process.exit`. Chỉ file này gọi `listen`.
 3. `app.js` bật `express.json()` và `export` app. Không gọi `listen`. Supertest import app từ đây, không chiếm cổng 3000.
 4. `HttpError` và error handler: lỗi có `status` thì trả status đó kèm `{ "error": message }`. Body không parse được thành JSON thì 400 `{ "error": "Body không phải JSON" }`. Lỗi khác trả 500 `{ "error": "Lỗi máy chủ" }`.
 5. Tạm thời thêm `GET /api/health` trả `{ "ok": true }` để thử proxy. Xóa route này ở AT-12 khi auth đã có đường thử thật.
@@ -98,7 +98,7 @@ Việc:
 
 1. `create({ userId, title, description, deadline, priority, status })`.
 2. `list({ userId, status, sort, order })`. `status` null thì không thêm điều kiện. `sort` và `order` đã được service kiểm whitelist; repository map tên cột, không nối thẳng chuỗi client vào SQL.
-3. Sắp `priority` bằng `CASE`. Sắp `deadline` với `deadline IS NULL` đứng trước để hạn trống ở cuối.
+3. Không cung cấp sort priority. Sắp `deadline` với `deadline IS NULL` đứng trước để hạn trống ở cuối.
 4. `update({ userId, id, fields })` chỉ cập nhật trường có trong `fields`, `WHERE id = ? AND user_id = ?`. Không có dòng thì trả `null`.
 5. `delete({ userId, id })` cùng điều kiện, trả `true`/`false`.
 
@@ -208,7 +208,7 @@ Việc:
 3. Giá trị ngoài whitelist thì 400 với câu `Trạng thái không hợp lệ`, `Cột sắp xếp không hợp lệ`, hoặc `Chiều sắp xếp không hợp lệ`. Không bỏ qua im lặng.
 4. Nhờ repository sắp đúng cách đã viết ở AT-07.
 
-Xong khi: TC06 và TC07 đúng. `GET /api/tasks?sort=id` trả 400. `priority` tăng dần ra thứ tự low, medium, high.
+Xong khi: TC06 và TC07 đúng. `GET /api/tasks?sort=id` trả 400. Priority tùy chọn low/high/null; chỉ giữ sort created_at và deadline trên API.
 
 ## AT-16 — HTTP client
 

@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-09",
+  "backup": "server/data/backups/app-before-refactor-20261109.db",
+  "counts": {
+    "users": 5,
+    "projects": 1,
+    "tasks": 22,
+    "notes": 10
+  },
+  "priorities": [
+    {
+      "priority": null,
+      "count": 12
+    },
+    {
+      "priority": "high",
+      "count": 7
+    },
+    {
+      "priority": "low",
+      "count": 3
+    }
+  ],
+  "indexes": [
+    "idx_notes_user_day",
+    "idx_projects_user",
+    "idx_tasks_user_completed",
+    "idx_tasks_user_created",
+    "idx_tasks_user_project",
+    "idx_tasks_user_status"
+  ],
+  "all_records_preserved_except_medium_to_null": true,
+  "foreign_key_check": "ok",
+  "integrity_check": "ok"
+}

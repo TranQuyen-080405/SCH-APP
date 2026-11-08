@@ -1,0 +1,101 @@
+<mxfile host="Electron">
+  <diagram id="ptm-erd" name="ERD">
+    <mxGraphModel dx="1687" dy="996" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="850" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=24;fontStyle=1;fontColor=#3f4756;" value="ERD Diagram" vertex="1">
+          <mxGeometry height="40" width="800" x="100" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#697181;" value="Personal Task Management · Các bảng và quan hệ chính" vertex="1">
+          <mxGeometry height="26" width="800" x="100" y="84" as="geometry" />
+        </mxCell>
+        <mxCell id="users" parent="1" style="shape=swimlane;html=1;horizontal=1;startSize=36;rounded=0;collapsible=0;container=1;fillColor=#dae8fc;swimlaneFillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontFamily=Arial;fontSize=16;fontStyle=1;align=left;spacingLeft=16;" value="users" vertex="1">
+          <mxGeometry height="124" width="240" x="130" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="users-fields" parent="users" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingTop=12;spacingLeft=16;fontFamily=Arial;fontSize=14;fontColor=#3f4756;" value="&lt;div style=&quot;line-height:26px;&quot;&gt;&lt;b&gt;PK&lt;/b&gt; id&lt;br&gt;email&lt;/div&gt;" vertex="1">
+          <mxGeometry height="88" width="240" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="projects" parent="1" style="shape=swimlane;html=1;horizontal=1;startSize=36;rounded=0;collapsible=0;container=1;fillColor=#fff0ef;swimlaneFillColor=#ffffff;strokeColor=#cf3e4d;strokeWidth=1.5;fontFamily=Arial;fontSize=16;fontStyle=1;fontColor=#3f4756;align=left;spacingLeft=16;" value="projects" vertex="1">
+          <mxGeometry height="150" width="240" x="570" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="projects-fields" parent="projects" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingTop=12;spacingLeft=16;fontFamily=Arial;fontSize=14;fontColor=#3f4756;" value="&lt;div style=&quot;line-height:26px;&quot;&gt;&lt;b&gt;PK&lt;/b&gt; id&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; user_id&lt;br&gt;name&lt;/div&gt;" vertex="1">
+          <mxGeometry height="114" width="240" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="notes" parent="1" style="shape=swimlane;html=1;horizontal=1;startSize=36;rounded=0;collapsible=0;container=1;fillColor=#e1d5e7;swimlaneFillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontFamily=Arial;fontSize=16;fontStyle=1;align=left;spacingLeft=16;" value="notes" vertex="1">
+          <mxGeometry height="202" width="240" x="130" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="notes-fields" parent="notes" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingTop=12;spacingLeft=16;fontFamily=Arial;fontSize=14;fontColor=#3f4756;" value="&lt;div style=&quot;line-height:26px;&quot;&gt;&lt;b&gt;PK&lt;/b&gt; id&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; user_id&lt;br&gt;title&lt;br&gt;content&lt;br&gt;noted_on&lt;/div&gt;" vertex="1">
+          <mxGeometry height="166" width="240" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="tasks" parent="1" style="shape=swimlane;html=1;horizontal=1;startSize=36;rounded=0;collapsible=0;container=1;fillColor=#d5e8d4;swimlaneFillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontFamily=Arial;fontSize=16;fontStyle=1;align=left;spacingLeft=16;" value="tasks" vertex="1">
+          <mxGeometry height="306" width="240" x="570" y="356" as="geometry" />
+        </mxCell>
+        <mxCell id="tasks-fields" parent="tasks" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingTop=12;spacingLeft=16;fontFamily=Arial;fontSize=14;fontColor=#3f4756;" value="&lt;div style=&quot;line-height:26px;&quot;&gt;&lt;b&gt;PK&lt;/b&gt; id&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; user_id&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; project_id&lt;br&gt;title&lt;br&gt;deadline&lt;br&gt;priority&lt;br&gt;status&lt;br&gt;outcome_note&lt;br&gt;outcome_rating&lt;/div&gt;" vertex="1">
+          <mxGeometry height="270" width="240" y="36" as="geometry" />
+        </mxCell>
+        <mxCell id="user-projects" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#697181;strokeWidth=1.5;startArrow=none;endArrow=none;exitX=1;exitY=0.322580645;exitDx=0;exitDy=0;entryX=0;entryY=0.266666667;entryDx=0;entryDy=0;" target="projects">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-projects-one" connectable="0" parent="user-projects" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.76" y="-13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-projects-many" connectable="0" parent="user-projects" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.7" y="-13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-notes" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#697181;strokeWidth=1.5;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="notes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-notes-one" connectable="0" parent="user-notes" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.74" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-notes-many" connectable="0" parent="user-notes" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.72" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-tasks" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#697181;strokeWidth=1.5;startArrow=none;endArrow=none;exitX=1;exitY=0.758064516;exitDx=0;exitDy=0;entryX=0;entryY=0.248366013;entryDx=0;entryDy=0;" target="tasks">
+          <mxGeometry relative="1" x="0.3299" as="geometry">
+            <Array as="points">
+              <mxPoint x="460" y="244" />
+              <mxPoint x="460" y="430" />
+              <mxPoint x="570" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-tasks-one" connectable="0" parent="user-tasks" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.866" y="-13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="user-tasks-many" connectable="0" parent="user-tasks" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.87" y="-13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="project-tasks" edge="1" parent="1" source="projects" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#697181;strokeWidth=1.5;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tasks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="project-tasks-optional" connectable="0" parent="project-tasks" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="0..1" vertex="1">
+          <mxGeometry relative="1" x="-0.58" y="23" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="project-tasks-many" connectable="0" parent="project-tasks" style="edgeLabel;html=1;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=13;fontColor=#3f4756;fillColor=#ffffff;" value="0..*" vertex="1">
+          <mxGeometry relative="1" x="0.58" y="23" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=12;fontColor=#697181;" value="PK: khóa chính · FK: khóa ngoại · Thuộc tính hiển thị: các trường chính" vertex="1">
+          <mxGeometry height="26" width="800" x="100" y="700" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

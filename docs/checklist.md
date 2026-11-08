@@ -46,7 +46,7 @@ Thiết kế để build: xong. Code: server API và client đã nối được 
 ### Task API
 
 - [x] AT-14 Validate task, tạo, sửa một phần, xóa
-- [x] AT-15 Lọc status, sắp xếp whitelist, deadline NULL ở cuối, priority theo mức
+- [x] AT-15 Lọc status, sắp xếp whitelist, deadline NULL ở cuối, priority tùy chọn low/high/null
 
 ### UI
 
@@ -64,7 +64,7 @@ Thiết kế để build: xong. Code: server API và client đã nối được 
 
 - [x] Migration `completed_at`, `outcome_note`, `outcome_rating`, giữ task cũ
 - [x] Hoàn thành ghi mốc, mở lại xóa mốc và giữ ghi chú
-- [x] `GET /api/dashboard?period=7d|30d` theo session, ngày tính theo UTC+7
+- [x] `GET /api/dashboard` cố định 7 ngày theo session, ngày tính theo UTC+7
 - [x] UI Công việc / Tổng quan, biểu đồ cột, ghi nhận kết quả tùy chọn
 
 ### Chất lượng và bàn giao

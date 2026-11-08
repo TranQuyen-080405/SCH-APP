@@ -1,0 +1,34 @@
+\section{Kiến trúc hệ thống}
+
+
+\subsection{Sơ đồ kiến trúc tổng quan}
+\begin{itemize}
+  \item \#TODO: Vẽ sơ đồ kiến trúc toàn hệ thống (Frontend, Backend, Database, Cloud).
+\end{itemize}
+Frontend React hiển thị giao diện và gọi API bằng Fetch, gửi kèm cookie phiên. Backend Express xác thực, kiểm tra dữ liệu và xử lý nghiệp vụ; Repository đọc/ghi file SQLite bằng câu SQL có tham số. Khi chạy local, Vite chuyển tiếp \texttt{/api} tới Express; trong Docker, Express phục vụ cả API và bản build frontend. Khi tách hai host, frontend dùng \texttt{VITE\_API\_URL}, backend cho phép CORS theo \texttt{CLIENT\_ORIGIN}.
+
+\subsection{Sơ đồ luồng dữ liệu}
+\begin{itemize}
+  \item \#TODO: Vẽ sơ đồ luồng dữ liệu từ User $\rightarrow$ Frontend $\rightarrow$ Backend $\rightarrow$ Database.
+\end{itemize}
+Ví dụ tạo công việc: người dùng gửi form; React gọi \texttt{POST /api/tasks} với JSON và cookie \texttt{sid}. Middleware kiểm tra Origin và phiên đăng nhập; Controller chuyển dữ liệu tới Service để kiểm tra các trường. Repository lưu công việc vào SQLite theo người dùng trong phiên; backend trả \texttt{201} cùng \texttt{\{task\}}, frontend tải lại danh sách. Nếu có lỗi, backend trả mã HTTP và \texttt{\{error\}}.
+
+\subsection{Tổ chức logic và API sau refactor}
+Validation đối tượng, id và ngày được dùng chung trong \texttt{server/src/validation.js};
+Service kiểm tra nghiệp vụ, Repository giới hạn dữ liệu theo tài khoản.
+Trang Tổng quan gọi một API nhận cả số liệu và 5 việc gần đây; thống kê cố định 7 ngày.
+Ghi chú mở editor từ dữ liệu danh sách, không có API GET chi tiết riêng.
+Đã bỏ component lọc trạng thái dư và các nhánh API không dùng trên UI.
+
+\subsection{Thành phần chọn trên giao diện}
+Các bộ lọc, sắp xếp, trạng thái và trường chọn trong form dùng chung
+\texttt{Select.jsx}. Popup thống nhất font Lora, nền, viền, dấu chọn và màu coral;
+tự giới hạn theo màn hình, hỗ trợ bàn phím và cảm ứng.
+Menu tài khoản, công việc và ghi chú dùng chung kiểu khung popup.
+
+\subsection{Kéo thả ghi chú}
+\texttt{NoteBoard} bố trí khung cố định, mỗi khung nhận một giấy.
+\texttt{NotesContext} xử lý kéo bằng chuột/cảm ứng: vào khung trống thì khớp vị trí,
+ra ngoài thì chuyển sang lớp nổi, để lại khung cũ. Tọa độ khung lưu bằng
+\texttt{PATCH /api/notes/:id} với trường \texttt{position}; không thêm bảng hoặc API.
+Ô có giấy từ chối thả chồng; API lỗi thì hoàn tác vị trí trên giao diện.

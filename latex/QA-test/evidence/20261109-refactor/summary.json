@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-09",
+  "tests": {
+    "backend": 63,
+    "frontend": 12,
+    "failures": 0
+  },
+  "build": "passed",
+  "endpoints": 17,
+  "schema": {
+    "tables": 4,
+    "columns": 31,
+    "declared_indexes": 6
+  },
+  "removed": [
+    "medium priority option/default/data",
+    "StatusTabs.jsx",
+    "unused priority colors and theme tokens",
+    "GET /api/notes/:id",
+    "API sorts priority/title/completed_at",
+    "dashboard 30-day branch and duplicate statistics aliases",
+    "extra recent-completed HTTP request",
+    "unused setActionError hook return"
+  ],
+  "smoke": {
+    "users": 20,
+    "measurement_seconds": 20,
+    "requests": 200,
+    "failures": 0,
+    "rps": 10.01,
+    "p95_ms": 7,
+    "raw_report": "performance-test/reports/20261109-001518-refactor-smoke"
+  },
+  "performance_note": "Full benchmark 2026-11-08 is historical, before this refactor",
+  "migration": {
+    "date": "2026-11-09",
+    "backup": "server/data/backups/app-before-refactor-20261109.db",
+    "counts": {
+      "users": 5,
+      "projects": 1,
+      "tasks": 22,
+      "notes": 10
+    },
+    "priorities": [
+      {
+        "priority": null,
+        "count": 12
+      },
+      {
+        "priority": "high",
+        "count": 7
+      },
+      {
+        "priority": "low",
+        "count": 3
+      }
+    ],
+    "indexes": [
+      "idx_notes_user_day",
+      "idx_projects_user",
+      "idx_tasks_user_completed",
+      "idx_tasks_user_created",
+      "idx_tasks_user_project",
+      "idx_tasks_user_status"
+    ],
+    "all_records_preserved_except_medium_to_null": true,
+    "foreign_key_check": "ok",
+    "integrity_check": "ok"
+  },
+  "local_http_check": "passed, including login, null priorities, dashboard six fields, JSON 404 and frontend",
+  "browser_e2e": "not run",
+  "latex_pdf": "not compiled"
+}
